@@ -7,6 +7,10 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
+from datetime import timedelta
+from django.db.models import Count, Avg
+from django.db import transaction
+from django.db.models import F
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -44,6 +48,10 @@ class Product(models.Model):
     weight = models.DecimalField(max_digits=6, decimal_places=2, help_text='Weight in grams')
     dimensions = models.CharField(max_length=50, blank=True, help_text='Dimensions in mm')
     is_featured = models.BooleanField(default=False)
+    
+    # Analytics fields for trending
+    views_count = models.PositiveIntegerField(default=0, help_text='Number of times product was viewed')
+    last_viewed = models.DateTimeField(null=True, blank=True, help_text='Last time product was viewed')
     
     # Discount fields
     discount_percentage = models.DecimalField(
@@ -127,6 +135,56 @@ class Product(models.Model):
         if self.is_discount_active():
             return self.discount_percentage
         return 0
+
+    def increment_views(self):
+        """Increment the view count and update last viewed timestamp."""
+        with transaction.atomic():
+            # Use F() expression to avoid race conditions
+            Product.objects.filter(id=self.id).update(
+                views_count=F('views_count') + 1,
+                last_viewed=timezone.now()
+            )
+            # Refresh the object from database
+            self.refresh_from_db()
+
+    def get_trending_score(self):
+        """Calculate trending score based on views, reviews, and recent activity."""
+        # Get review count and average rating
+        reviews_data = self.reviews.filter(is_approved=True).aggregate(
+            review_count=Count('id'),
+            avg_rating=Avg('rating')
+        )
+        
+        review_count = reviews_data['review_count'] or 0
+        avg_rating = reviews_data['avg_rating'] or 0
+        
+        # Get recent order count (last 30 days)
+        thirty_days_ago = timezone.now() - timedelta(days=30)
+        recent_orders = OrderItem.objects.filter(
+            product=self,
+            order__created_at__gte=thirty_days_ago,
+            order__status__in=['delivered', 'shipped']
+        ).count()
+        
+        # Calculate trending score
+        # Formula: (views * 0.3) + (reviews * 0.4) + (recent_orders * 0.3) + (avg_rating * 0.2)
+        trending_score = (
+            (self.views_count * 0.3) +
+            (review_count * 0.4) +
+            (recent_orders * 0.3) +
+            (avg_rating * 0.2)
+        )
+        
+        return round(trending_score, 2)
+
+    def is_new_arrival(self):
+        """Check if product is a new arrival (created in last 7 days)."""
+        seven_days_ago = timezone.now() - timedelta(days=7)
+        return self.created_at >= seven_days_ago
+
+    def is_trending(self):
+        """Check if product is trending based on trending score."""
+        return self.get_trending_score() >= 2.0  # Lower threshold for trending badge
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)

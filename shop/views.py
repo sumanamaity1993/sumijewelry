@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Q, Avg
+from django.db.models import Q, Avg, Count, F, Q
 from django.core.paginator import Paginator
 from .models import Category, Product, Order, OrderItem, Cart, CartItem, ProductReview, TeamMember, Discount, Testimonial
 from django.views.decorators.http import require_POST
@@ -13,24 +13,33 @@ from django.http import JsonResponse
 from .forms import ProductReviewForm
 from datetime import timedelta
 from django.utils import timezone
+from django.db import models
 
 def home(request):
     """Home page view showing featured products and categories."""
     featured_products = Product.objects.filter(is_featured=True, available=True)[:8]
     
-    # New Arrivals - Products created in the last 30 days
-    thirty_days_ago = timezone.now() - timedelta(days=30)
+    # New Arrivals - Products created in the last 7 days
+    seven_days_ago = timezone.now() - timedelta(days=7)
     new_arrivals = Product.objects.filter(
         available=True, 
-        created_at__gte=thirty_days_ago
+        created_at__gte=seven_days_ago
     ).order_by('-created_at')[:4]
     
-    # Best Sellers - Products with most orders (for now, using featured products as best sellers)
-    # In a real implementation, you'd count OrderItem quantities
-    best_sellers = Product.objects.filter(
-        available=True,
-        is_featured=True
-    ).order_by('-created_at')[:4]
+    # Trending Products - Based on sophisticated analytics (views, reviews, recent orders)
+    trending_products = Product.objects.filter(
+        available=True
+    ).annotate(
+        trending_score=models.F('views_count') * 0.3 + 
+                      models.Count('reviews', filter=models.Q(reviews__is_approved=True)) * 0.4 +
+                      models.Count('orderitem', filter=models.Q(
+                          orderitem__order__created_at__gte=timezone.now() - timedelta(days=30),
+                          orderitem__order__status__in=['delivered', 'shipped']
+                      )) * 0.3 +
+                      models.Avg('reviews__rating', filter=models.Q(reviews__is_approved=True)) * 0.2
+    ).filter(
+        trending_score__gt=0  # Only show products with some trending activity
+    ).order_by('-trending_score')[:4]  # Show top 4 trending products on home page
     
     categories = Category.objects.all()[:6]
     
@@ -46,7 +55,7 @@ def home(request):
     return render(request, 'shop/home.html', {
         'featured_products': featured_products,
         'new_arrivals': new_arrivals,
-        'best_sellers': best_sellers,
+        'trending_products': trending_products,
         'categories': categories,
         'testimonials': testimonials,
         'active_discounts': active_discounts,
@@ -132,6 +141,12 @@ def product_list(request, category_slug=None):
 
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug)
+    
+    # Track product view for analytics
+    print(f"Before increment: Product '{product.name}' has {product.views_count} views")
+    product.increment_views()
+    print(f"After increment: Product '{product.name}' now has {product.views_count} views")
+    
     cart_item = None
     if request.user.is_authenticated:
         cart_item = CartItem.objects.filter(
@@ -448,3 +463,24 @@ def mark_order_delivered(request, order_id):
     else:
         messages.warning(request, 'Cancelled orders cannot be marked as delivered.')
     return redirect('shop:order_detail', order_id=order.id)
+
+def trending_products(request):
+    """View for displaying top trending products."""
+    # Get top 10 trending products based on sophisticated analytics
+    trending_products = Product.objects.filter(
+        available=True
+    ).annotate(
+        trending_score=models.F('views_count') * 0.3 + 
+                      models.Count('reviews', filter=models.Q(reviews__is_approved=True)) * 0.4 +
+                      models.Count('orderitem', filter=models.Q(
+                          orderitem__order__created_at__gte=timezone.now() - timedelta(days=30),
+                          orderitem__order__status__in=['delivered', 'shipped']
+                      )) * 0.3 +
+                      models.Avg('reviews__rating', filter=models.Q(reviews__is_approved=True)) * 0.2
+    ).filter(
+        trending_score__gt=0  # Only show products with some trending activity
+    ).order_by('-trending_score')[:10]  # Show top 10 trending products
+    
+    return render(request, 'shop/trending_products.html', {
+        'trending_products': trending_products,
+    })

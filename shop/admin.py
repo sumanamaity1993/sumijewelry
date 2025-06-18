@@ -15,13 +15,13 @@ class ProductImageInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'price', 'discount_percentage', 'get_discounted_price_display', 'stock', 'available', 'created_at']
+    list_display = ['name', 'category', 'price', 'discount_percentage', 'get_discounted_price_display', 'stock', 'available', 'views_count', 'get_trending_score_display', 'created_at']
     list_filter = ['available', 'created_at', 'category', 'material', 'is_featured']
     list_editable = ['price', 'discount_percentage', 'stock', 'available']
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ['name', 'description']
     inlines = [ProductImageInline]
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['created_at', 'updated_at', 'views_count', 'last_viewed', 'get_trending_score_display']
     
     fieldsets = (
         ('Basic Information', {
@@ -38,6 +38,11 @@ class ProductAdmin(admin.ModelAdmin):
         ('Product Details', {
             'fields': ('material', 'weight', 'dimensions')
         }),
+        ('Analytics', {
+            'fields': ('views_count', 'last_viewed', 'get_trending_score_display'),
+            'classes': ('collapse',),
+            'description': 'Analytics data for trending calculations.'
+        }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
@@ -50,6 +55,14 @@ class ProductAdmin(admin.ModelAdmin):
             return f"₹{obj.get_discounted_price():.2f} (-{obj.discount_percentage}%)"
         return f"₹{obj.price:.2f}"
     get_discounted_price_display.short_description = 'Price (with discount)'
+
+    def get_trending_score_display(self, obj):
+        """Display trending score in admin list."""
+        score = obj.get_trending_score()
+        if score >= 5.0:
+            return f"{score} 🔥"
+        return f"{score}"
+    get_trending_score_display.short_description = 'Trending Score'
 
 @admin.register(Discount)
 class DiscountAdmin(admin.ModelAdmin):

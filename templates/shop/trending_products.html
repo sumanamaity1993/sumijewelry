@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load shop_extras %}
+
+{% block title %}Trending Products - Sumi Jewelry Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="section-header text-center mb-5">
+        <h1>Trending Products</h1>
+        <p class="text-muted">Our most popular jewelry pieces based on views, reviews, and sales</p>
+    </div>
+
+    {% if trending_products %}
+    <div class="row g-4">
+        {% for product in trending_products %}
+        <div class="col-lg-3 col-md-4 col-6">
+            <div class="position-relative">
+                {% if product.is_trending %}
+                <span class="product-badge badge-trending">TRENDING</span>
+                {% endif %}
+                {% include "shop/includes/product_card.html" %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="text-center mt-5">
+        <a href="{% url 'shop:product_list' %}" class="btn btn-outline-primary">View All Products</a>
+        <a href="{% url 'shop:home' %}" class="btn btn-primary ms-2">Back to Home</a>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <h3>No Trending Products Yet</h3>
+        <p class="text-muted">Products will appear here as they gain popularity through views, reviews, and sales.</p>
+        <a href="{% url 'shop:product_list' %}" class="btn btn-primary">Browse All Products</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

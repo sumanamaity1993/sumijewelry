@@ -136,37 +136,109 @@
             font-weight: 500;
             margin-bottom: 1rem;
         }
+        
+        /* Dark header styles */
+        .navbar-dark .nav-link:hover {
+            color: #d4af37 !important;
+        }
+        
+        .navbar-dark .dropdown-item:hover {
+            background-color: #d4af37 !important;
+            color: #1a1a2e !important;
+        }
+        
+        .navbar-dark .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .navbar-dark .form-control:focus {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            border-color: #d4af37 !important;
+            box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25) !important;
+            color: #ffffff !important;
+        }
+        
+        .navbar-dark .btn-outline-warning:hover {
+            background-color: #d4af37 !important;
+            border-color: #d4af37 !important;
+            color: #1a1a2e !important;
+        }
+        
+        /* Mobile responsive adjustments for dark header */
+        @media (max-width: 991.98px) {
+            .navbar-dark .navbar-collapse {
+                background-color: rgba(26, 26, 46, 0.95);
+                border-radius: 8px;
+                margin-top: 1rem;
+                padding: 1rem;
+                border: 1px solid #d4af37;
+            }
+            
+            .navbar-dark .navbar-nav .nav-link {
+                padding: 0.75rem 0;
+                border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            }
+            
+            .navbar-dark .navbar-nav .nav-link:last-child {
+                border-bottom: none;
+            }
+            
+            .navbar-dark .dropdown-menu {
+                background-color: rgba(26, 26, 46, 0.8) !important;
+                border: 1px solid #d4af37 !important;
+                margin-top: 0.5rem;
+            }
+            
+            .navbar-dark .form-control {
+                margin-bottom: 1rem;
+            }
+            
+            .navbar-dark .btn-outline-warning {
+                width: 100%;
+            }
+        }
+        
+        /* Ensure dropdown menus are properly styled on all devices */
+        .dropdown-menu {
+            margin-top: 0;
+        }
+        
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+        }
+        
+        .dropdown-divider {
+            margin: 0.5rem 0;
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); border-bottom: 2px solid #d4af37;">
+        <div class="container" style="max-width: 1200px;">
             <a class="navbar-brand" href="{% url 'shop:home' %}">
                 <img src="{% static 'images/logo.png' %}" alt="Sumi Jewelry Store Logo">
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="border-color: #d4af37;">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'shop:home' %}">Home</a>
+                        <a class="nav-link" href="{% url 'shop:home' %}" style="color: #ffffff; font-weight: 500; transition: color 0.3s ease;">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'shop:product_list' %}">Products</a>
+                        <a class="nav-link" href="{% url 'shop:product_list' %}" style="color: #ffffff; font-weight: 500; transition: color 0.3s ease;">Products</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" style="color: #ffffff; font-weight: 500; transition: color 0.3s ease;">
                             Categories
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu" style="background-color: #1a1a2e; border: 1px solid #d4af37;">
                             {% for category in categories %}
                             <li>
-                                <a class="dropdown-item" href="{% url 'shop:product_list_by_category' category.slug %}">
-                                    {{ category.name }}
-                                </a>
+                                <a class="dropdown-item" href="{% url 'shop:product_list_by_category' category.slug %}" style="color: #ffffff; transition: background-color 0.3s ease;">{{ category.name }}</a>
                             </li>
                             {% endfor %}
                         </ul>
@@ -175,41 +247,41 @@
                 
                 <!-- Search Form -->
                 <form class="d-flex me-3" action="{% url 'shop:search' %}" method="get">
-                    <input class="form-control me-2" type="search" name="q" placeholder="Search products...">
-                    <button class="btn btn-outline-primary" type="submit">Search</button>
+                    <input class="form-control me-2" type="search" name="q" placeholder="Search products..." style="background-color: rgba(255, 255, 255, 0.1); border: 1px solid #d4af37; color: #ffffff;">
+                    <button class="btn btn-outline-warning" type="submit" style="border-color: #d4af37; color: #d4af37;">Search</button>
                 </form>
                 
                 <!-- User Menu -->
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link position-relative" href="{% url 'shop:cart_detail' %}">
+                        <a class="nav-link position-relative" href="{% url 'shop:cart_detail' %}" style="color: #ffffff; font-weight: 500; transition: color 0.3s ease;">
                             <i class="fas fa-shopping-cart"></i> Cart
                             {% if cart_count > 0 %}
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background-color: #d4af37; color: #1a1a2e;">
                                 {{ cart_count }}
                             </span>
                             {% endif %}
                         </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" style="color: #ffffff; font-weight: 500; transition: color 0.3s ease;">
                             <i class="fas fa-user"></i> {{ user.username }}
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{% url 'shop:profile' %}">Profile</a></li>
-                            <li><a class="dropdown-item" href="{% url 'shop:account_settings' %}">Account Settings</a></li>
-                            <li><a class="dropdown-item" href="{% url 'shop:user_orders' %}">Orders</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a></li>
+                        <ul class="dropdown-menu dropdown-menu-end" style="background-color: #1a1a2e; border: 1px solid #d4af37;">
+                            <li><a class="dropdown-item" href="{% url 'shop:profile' %}" style="color: #ffffff; transition: background-color 0.3s ease;">Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'shop:account_settings' %}" style="color: #ffffff; transition: background-color 0.3s ease;">Account Settings</a></li>
+                            <li><a class="dropdown-item" href="{% url 'shop:user_orders' %}" style="color: #ffffff; transition: background-color 0.3s ease;">Orders</a></li>
+                            <li><hr class="dropdown-divider" style="border-color: #d4af37;"></li>
+                            <li><a class="dropdown-item" href="{% url 'account_logout' %}" style="color: #ffffff; transition: background-color 0.3s ease;">Logout</a></li>
                         </ul>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                        <a class="nav-link" href="{% url 'account_login' %}" style="color: #ffffff; font-weight: 500; transition: color 0.3s ease;">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'account_signup' %}">Sign Up</a>
+                        <a class="nav-link" href="{% url 'account_signup' %}" style="color: #ffffff; font-weight: 500; transition: color 0.3s ease;">Sign Up</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -236,33 +308,36 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); border-top: 2px solid #d4af37; color: #ffffff;">
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
-                    <h5>About Us</h5>
-                    <p>Sumi Jewelry Store offers exquisite jewelry pieces crafted with precision and passion.</p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Quick Links</h5>
+                    <h5 style="color: #ffffff; font-weight: 600; margin-bottom: 1.5rem;">About Us</h5>
+                    <p style="color: #ffffff; opacity: 0.9; line-height: 1.6;">Sumi Jewelry Store offers exquisite jewelry pieces crafted with precision and passion.</p>
                     <ul class="list-unstyled">
-                        <li><a href="{% url 'shop:home' %}">Home</a></li>
-                        <li><a href="{% url 'shop:product_list' %}">Products</a></li>
-                        <li><a href="{% url 'shop:cart_detail' %}">Cart</a></li>
+                        <li><a href="{% url 'shop:team' %}" style="color: #d4af37; text-decoration: none; transition: color 0.3s ease; font-weight: 500;">Meet Our Team</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">
-                    <h5>Contact Us</h5>
+                    <h5 style="color: #ffffff; font-weight: 600; margin-bottom: 1.5rem;">Quick Links</h5>
                     <ul class="list-unstyled">
-                        <li><i class="fas fa-phone"></i> +91 98765 43210</li>
-                        <li><i class="fas fa-envelope"></i> info@sumijewelry.com</li>
-                        <li><i class="fas fa-map-marker-alt"></i> Sumi Jewelry Store, Phoenix Marketcity, Whitefield, Bangalore, Karnataka - 560048</li>
+                        <li style="margin-bottom: 0.5rem;"><a href="{% url 'shop:home' %}" style="color: #d4af37; text-decoration: none; transition: color 0.3s ease; font-weight: 500;">Home</a></li>
+                        <li style="margin-bottom: 0.5rem;"><a href="{% url 'shop:product_list' %}" style="color: #d4af37; text-decoration: none; transition: color 0.3s ease; font-weight: 500;">Products</a></li>
+                        <li style="margin-bottom: 0.5rem;"><a href="{% url 'shop:cart_detail' %}" style="color: #d4af37; text-decoration: none; transition: color 0.3s ease; font-weight: 500;">Cart</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5 style="color: #ffffff; font-weight: 600; margin-bottom: 1.5rem;">Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li style="color: #ffffff; opacity: 0.9; margin-bottom: 0.75rem;"><i class="fas fa-phone" style="color: #d4af37; margin-right: 0.5rem;"></i> +91 9046263243</li>
+                        <li style="color: #ffffff; opacity: 0.9; margin-bottom: 0.75rem;"><i class="fas fa-envelope" style="color: #d4af37; margin-right: 0.5rem;"></i> info@sumijewelry.com</li>
+                        <li style="color: #ffffff; opacity: 0.9; margin-bottom: 0.75rem;"><i class="fas fa-map-marker-alt" style="color: #d4af37; margin-right: 0.5rem;"></i> Sumi Jewelry Store, Phoenix Marketcity, Whitefield, Bangalore, Karnataka - 560048</li>
                     </ul>
                 </div>
             </div>
-            <hr>
+            <hr style="border-color: #d4af37; margin: 2rem 0;">
             <div class="text-center">
-                <p>&copy; {% now "Y" %} Sumi Jewelry Store. All rights reserved.</p>
+                <p style="color: #ffffff; opacity: 0.8; margin: 0;">&copy; {% now "Y" %} Sumi Jewelry Store. All rights reserved.</p>
             </div>
         </div>
     </footer>

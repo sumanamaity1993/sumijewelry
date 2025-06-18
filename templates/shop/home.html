@@ -10,7 +10,7 @@
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         position: relative;
         overflow: hidden;
-        min-height: 500px;
+        min-height: 300px;
         display: flex;
         align-items: center;
     }
@@ -22,7 +22,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: url('{% static "images/banner.png" %}') center/cover;
+        background: url('{% static "images/banner.png" %}?v=1') center/cover;
         opacity: 0.1;
         z-index: 1;
     }
@@ -347,13 +347,23 @@
             margin-bottom: 1rem;
         }
         
-        .newsletter-section .form-control,
-        .newsletter-section .btn {
-            border-radius: 25px;
+        /* Mobile styles for new stats section */
+        .stats-section .stat-number {
+            font-size: 2rem !important;
+        }
+        
+        .stats-section .stat-label {
+            font-size: 0.8rem !important;
+        }
+        
+        /* Mobile styles for new newsletter section */
+        .newsletter-section .form-control {
+            border-radius: 25px !important;
             margin-bottom: 0.5rem;
         }
         
         .newsletter-section .btn {
+            border-radius: 25px !important;
             width: 100%;
         }
     }
@@ -399,6 +409,23 @@
         .section-header p {
             font-size: 1rem;
         }
+        
+        /* Mobile styles for new sections */
+        .stats-section .stat-number {
+            font-size: 1.8rem !important;
+        }
+        
+        .stats-section .stat-label {
+            font-size: 0.7rem !important;
+        }
+        
+        .newsletter-section h4 {
+            font-size: 1.2rem;
+        }
+        
+        .newsletter-section p {
+            font-size: 0.9rem;
+        }
     }
     
     @media (max-width: 480px) {
@@ -432,6 +459,173 @@
             width: 45px;
             height: 45px;
             font-size: 1rem;
+        }
+        
+        /* Mobile styles for new sections */
+        .stats-section .stat-number {
+            font-size: 1.5rem !important;
+        }
+        
+        .stats-section .stat-label {
+            font-size: 0.6rem !important;
+        }
+        
+        .newsletter-section h4 {
+            font-size: 1.1rem;
+        }
+        
+        .newsletter-section p {
+            font-size: 0.8rem;
+        }
+        
+        .newsletter-section .form-control {
+            font-size: 0.9rem;
+            padding: 8px 15px;
+        }
+        
+        .newsletter-section .btn {
+            font-size: 0.9rem;
+            padding: 8px 15px;
+        }
+    }
+    
+    /* Category Card Styles */
+    .category-card-wrapper {
+        perspective: 1000px;
+    }
+    
+    .category-card {
+        transform-style: preserve-3d;
+        cursor: pointer;
+    }
+    
+    .category-card:hover {
+        transform: translateY(-10px) rotateX(5deg);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
+    }
+    
+    .category-card:hover .category-image {
+        transform: scale(1.1);
+    }
+    
+    .category-card:hover .category-overlay {
+        opacity: 1;
+    }
+    
+    .category-card:hover .category-icon {
+        transform: scale(1) rotate(360deg);
+    }
+    
+    .category-card:hover .product-count-badge {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    
+    .category-card:hover .card-title {
+        color: #d4af37 !important;
+    }
+    
+    /* Category Image Animation */
+    .category-image-container {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .category-image {
+        transition: transform 0.6s ease;
+    }
+    
+    /* Category Overlay */
+    .category-overlay {
+        background: linear-gradient(135deg, rgba(26, 26, 46, 0.8) 0%, rgba(212, 175, 55, 0.4) 100%);
+        transition: opacity 0.4s ease;
+    }
+    
+    /* Category Icon Animation */
+    .category-icon {
+        transition: all 0.4s ease;
+    }
+    
+    /* Product Count Badge */
+    .product-count-badge {
+        transition: all 0.4s ease;
+    }
+    
+    /* Responsive Category Cards */
+    @media (max-width: 768px) {
+        .category-card {
+            margin-bottom: 0.5rem;
+        }
+        
+        .category-image-container {
+            height: 100px !important;
+        }
+        
+        .card-body {
+            padding: 0.75rem !important;
+        }
+        
+        .card-title {
+            font-size: 0.85rem !important;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .category-image-container {
+            height: 80px !important;
+        }
+        
+        .card-body {
+            padding: 0.5rem !important;
+        }
+        
+        .card-title {
+            font-size: 0.8rem !important;
+        }
+    }
+    
+    /* Category Section Background Animation */
+    .category-section {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .category-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        animation: shimmer 3s infinite;
+    }
+    
+    @keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+    
+    /* Category Card Loading Animation */
+    .category-card {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .category-card:nth-child(1) { animation-delay: 0.1s; }
+    .category-card:nth-child(2) { animation-delay: 0.2s; }
+    .category-card:nth-child(3) { animation-delay: 0.3s; }
+    .category-card:nth-child(4) { animation-delay: 0.4s; }
+    .category-card:nth-child(5) { animation-delay: 0.5s; }
+    .category-card:nth-child(6) { animation-delay: 0.6s; }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 </style>
@@ -472,80 +666,64 @@
             <a href="{% url 'shop:product_list' %}" class="btn hero-btn">
                 <i class="fas fa-shopping-bag me-2"></i>Shop Now
             </a>
-            
-            <!-- Stats Section -->
-            <div class="stats-section">
-                <div class="row">
-                    <div class="col-md-3 col-6">
-                        <div class="stat-item">
-                            <span class="stat-number">500+</span>
-                            <span class="stat-label">Happy Customers</span>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-6">
-                        <div class="stat-item">
-                            <span class="stat-number">100+</span>
-                            <span class="stat-label">Unique Designs</span>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-6">
-                        <div class="stat-item">
-                            <span class="stat-number">5★</span>
-                            <span class="stat-label">Customer Rating</span>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-6">
-                        <div class="stat-item">
-                            <span class="stat-number">24/7</span>
-                            <span class="stat-label">Support</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Newsletter Signup Section -->
-<section class="py-4 newsletter-section">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <h4 class="mb-2">Stay Updated</h4>
-                <p class="mb-0">Get exclusive offers and new collection alerts</p>
-            </div>
-            <div class="col-md-6">
-                <form class="d-flex">
-                    <input type="email" class="form-control me-2" placeholder="Enter your email" required>
-                    <button class="btn btn-light" type="submit">Subscribe</button>
-                </form>
-            </div>
         </div>
     </div>
 </section>
 
 <!-- Featured Categories -->
-<section class="py-4">
+<section class="py-5" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
     <div class="container">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <h2 class="h4 mb-0">Shop by Category</h2>
-            <a href="{% url 'shop:product_list' %}" class="btn btn-link text-decoration-none">View All</a>
+        <div class="section-header text-center mb-5">
+            <h2 style="font-size: 2.5rem; font-weight: 700; color: #333; margin-bottom: 1rem;">Shop by Category</h2>
+            <p style="font-size: 1.1rem; color: #666; max-width: 600px; margin: 0 auto;">Explore our curated collections of exquisite jewelry pieces, each crafted with precision and passion</p>
         </div>
-        <div class="d-flex gap-3 overflow-auto pb-2">
+        
+        <div class="row g-3">
             {% for category in categories %}
-            <a href="{% url 'shop:product_list_by_category' category.slug %}" class="text-decoration-none" style="min-width: 100px;">
-                <div class="card category-card h-100 border-0 shadow-sm">
-                    {% if category.image %}
-                    <img src="{{ category.image.url }}" class="card-img-top" alt="{{ category.name }}" style="height: 80px; object-fit: cover;">
-                    {% else %}
-                    <img src="https://via.placeholder.com/200x120" class="card-img-top" alt="{{ category.name }}">
-                    {% endif %}
-                    <div class="card-body p-3 text-center">
-                        <h5 class="card-title h6 mb-0">{{ category.name }}</h5>
-                    </div>
+            <div class="col-lg-2 col-md-3 col-4 col-6">
+                <div class="category-card-wrapper">
+                    <a href="{% url 'shop:product_list_by_category' category.slug %}" class="text-decoration-none">
+                        <div class="category-card h-100 border-0 shadow-lg position-relative overflow-hidden" style="border-radius: 15px; transition: all 0.4s ease; background: white;">
+                            <!-- Category Image with Overlay -->
+                            <div class="category-image-container position-relative" style="height: 120px; overflow: hidden;">
+                                {% if category.image %}
+                                <img src="{{ category.image.url }}" class="category-image w-100 h-100" alt="{{ category.name }}" style="object-fit: cover; transition: transform 0.4s ease;">
+                                {% else %}
+                                <div class="category-placeholder w-100 h-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    <i class="fas fa-gem fa-2x text-white"></i>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Gradient Overlay -->
+                                <div class="category-overlay position-absolute w-100 h-100" style="background: linear-gradient(135deg, rgba(26, 26, 46, 0.7) 0%, rgba(212, 175, 55, 0.3) 100%); top: 0; left: 0; opacity: 0; transition: opacity 0.4s ease;"></div>
+                                
+                                <!-- Category Icon -->
+                                <div class="category-icon position-absolute" style="top: 8px; right: 8px; background: rgba(212, 175, 55, 0.9); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; transform: scale(0); transition: transform 0.4s ease;">
+                                    <i class="fas fa-arrow-right"></i>
+                                </div>
+                                
+                                <!-- Product Count Badge -->
+                                <div class="product-count-badge position-absolute" style="top: 8px; left: 8px; background: rgba(255, 255, 255, 0.9); color: #333; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; transform: translateY(-10px); opacity: 0; transition: all 0.4s ease;">
+                                    {{ category.product_set.count }}
+                                </div>
+                            </div>
+                            
+                            <!-- Category Content -->
+                            <div class="card-body p-3 text-center">
+                                <h5 class="card-title h6 mb-0" style="color: #333; font-weight: 600; transition: color 0.3s ease; font-size: 0.9rem;">{{ category.name }}</h5>
+                            </div>
+                        </div>
+                    </a>
                 </div>
-            </a>
+            </div>
             {% endfor %}
+        </div>
+        
+        <!-- View All Categories Button -->
+        <div class="text-center mt-5">
+            <a href="{% url 'shop:product_list' %}" class="btn btn-lg" style="background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; border: 2px solid #d4af37; padding: 15px 40px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; text-decoration: none;">
+                <i class="fas fa-th-large me-2"></i>View All Products
+            </a>
         </div>
     </div>
 </section>
@@ -561,7 +739,7 @@
             {% for product in new_arrivals %}
             <div class="col-md-3 col-6">
                 <div class="position-relative">
-                    {% if product.created_at|date:"Y-m-d" >= "now"|date:"Y-m-d"|add:"-7" %}
+                    {% if product.is_new_arrival %}
                     <span class="product-badge badge-new">NEW</span>
                     {% endif %}
                     {% include "shop/includes/product_card.html" %}
@@ -575,18 +753,18 @@
     </div>
 </section>
 
-<!-- Best Sellers Section -->
+<!-- Trending Products Section -->
 <section class="py-5 bg-light">
     <div class="container">
         <div class="section-header">
-            <h2>Best Sellers</h2>
-            <p>Our most popular jewelry pieces loved by customers</p>
+            <h2>Trending Now</h2>
+            <p>Our most popular jewelry pieces based on views, reviews, and sales</p>
         </div>
         <div class="row g-4">
-            {% for product in best_sellers %}
+            {% for product in trending_products %}
             <div class="col-md-3 col-6">
                 <div class="position-relative">
-                    {% if product.is_featured %}
+                    {% if product.is_trending %}
                     <span class="product-badge badge-trending">TRENDING</span>
                     {% endif %}
                     {% include "shop/includes/product_card.html" %}
@@ -595,7 +773,7 @@
             {% endfor %}
         </div>
         <div class="text-center mt-4">
-            <a href="{% url 'shop:product_list' %}" class="btn btn-outline-primary">View All Best Sellers</a>
+            <a href="{% url 'shop:trending_products' %}" class="btn btn-outline-primary">View All Trending Products</a>
         </div>
     </div>
 </section>
@@ -616,6 +794,56 @@
         </div>
         <div class="text-center mt-4">
             <a href="{% url 'shop:product_list' %}" class="btn btn-outline-primary btn-lg">View All Products</a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 col-6">
+                <div class="text-center">
+                    <div class="stat-number" style="font-size: 2.5rem; font-weight: 700; display: block; margin-bottom: 0.5rem;">500+</div>
+                    <div class="stat-label" style="font-size: 0.9rem; opacity: 0.8;">Happy Customers</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="text-center">
+                    <div class="stat-number" style="font-size: 2.5rem; font-weight: 700; display: block; margin-bottom: 0.5rem;">100+</div>
+                    <div class="stat-label" style="font-size: 0.9rem; opacity: 0.8;">Unique Designs</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="text-center">
+                    <div class="stat-number" style="font-size: 2.5rem; font-weight: 700; display: block; margin-bottom: 0.5rem;">5★</div>
+                    <div class="stat-label" style="font-size: 0.9rem; opacity: 0.8;">Customer Rating</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="text-center">
+                    <div class="stat-number" style="font-size: 2.5rem; font-weight: 700; display: block; margin-bottom: 0.5rem;">24/7</div>
+                    <div class="stat-label" style="font-size: 0.9rem; opacity: 0.8;">Support</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="py-4 newsletter-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h4 class="mb-2">Stay Updated</h4>
+                <p class="mb-0">Get exclusive offers and new collection alerts</p>
+            </div>
+            <div class="col-md-6">
+                <form class="d-flex">
+                    <input type="email" class="form-control me-2" placeholder="Enter your email" required>
+                    <button class="btn btn-light" type="submit">Subscribe</button>
+                </form>
+            </div>
         </div>
     </div>
 </section>
