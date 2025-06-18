@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load account socialaccount %}
+{% load crispy_forms_tags %}
+
+{% block title %}Account Settings - Sumi Jewelry Store{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Account Settings</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="#password" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-key me-2"></i> Change Password
+                    </a>
+                    <a href="#email" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-envelope me-2"></i> Email Addresses
+                    </a>
+                    <a href="#social" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-link me-2"></i> Connected Accounts
+                    </a>
+                    <a href="{% url 'shop:profile' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-user me-2"></i> Back to Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Content -->
+        <div class="col-md-9">
+            <div class="tab-content">
+                <!-- Password Change -->
+                <div class="tab-pane fade show active" id="password">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Change Password</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if user.has_usable_password %}
+                            <form method="post" action="{% url 'account_change_password' %}" class="password_change">
+                                {% csrf_token %}
+                                {{ password_change_form|crispy }}
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" class="btn btn-primary" name="action">Change Password</button>
+                                </div>
+                            </form>
+                            {% else %}
+                            <div class="alert alert-info">
+                                <p class="mb-0">You haven't set a password yet. You can set one using the form below.</p>
+                            </div>
+                            <form method="post" action="{% url 'account_set_password' %}" class="set_password">
+                                {% csrf_token %}
+                                {{ set_password_form|crispy }}
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" class="btn btn-primary" name="action">Set Password</button>
+                                </div>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Management -->
+                <div class="tab-pane fade" id="email">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Email Addresses</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if user.emailaddress_set.all %}
+                            <form action="{% url 'account_email' %}" method="post">
+                                {% csrf_token %}
+                                <div class="mb-4">
+                                    {% for emailaddress in user.emailaddress_set.all %}
+                                    <div class="form-check mb-2">
+                                        <input id="email_radio_{{ forloop.counter }}" type="radio" name="email" 
+                                               {% if emailaddress.primary or user.emailaddress_set.count == 1 %}checked="checked"{% endif %} 
+                                               value="{{ emailaddress.email }}" class="form-check-input">
+                                        <label for="email_radio_{{ forloop.counter }}" class="form-check-label">
+                                            {{ emailaddress.email }}
+                                            {% if emailaddress.primary %}
+                                            <span class="badge bg-success">Primary</span>
+                                            {% endif %}
+                                            {% if emailaddress.verified %}
+                                            <span class="badge bg-info">Verified</span>
+                                            {% else %}
+                                            <span class="badge bg-warning">Unverified</span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" name="action_primary" class="btn btn-outline-primary me-2">Make Primary</button>
+                                    <button type="submit" name="action_send" class="btn btn-outline-info me-2">Re-send Verification</button>
+                                    <button type="submit" name="action_remove" class="btn btn-outline-danger">Remove</button>
+                                </div>
+                            </form>
+                            {% else %}
+                            <div class="alert alert-warning">
+                                <p class="mb-0">You currently do not have any email address set up.</p>
+                            </div>
+                            {% endif %}
+
+                            <hr>
+
+                            <h6>Add Email Address</h6>
+                            <form method="post" action="{% url 'account_email' %}" class="add_email">
+                                {% csrf_token %}
+                                {{ email_form|crispy }}
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" name="action_add" class="btn btn-primary">Add Email</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Account Connections -->
+                <div class="tab-pane fade" id="social">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Connected Accounts</h5>
+                        </div>
+                        <div class="card-body">
+                            {% get_providers as socialaccount_providers %}
+                            {% if socialaccount_providers %}
+                            <form method="post" action="{% url 'socialaccount_connections' %}">
+                                {% csrf_token %}
+                                {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+
+                                {% if socialaccount_list %}
+                                <div class="mb-4">
+                                    {% for base_account in socialaccount_list %}
+                                    {% with base_account.get_provider_account as account %}
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <i class="fab fa-{{ account.get_brand.name|lower }} fa-2x me-2"></i>
+                                            <strong>{{ account.get_brand.name }}</strong>
+                                            <span class="text-muted">({{ account }})</span>
+                                        </div>
+                                        <button type="submit" name="account" value="{{ base_account.id }}" class="btn btn-outline-danger btn-sm">
+                                            Disconnect
+                                        </button>
+                                    </div>
+                                    {% endwith %}
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <div class="alert alert-info">
+                                    <p class="mb-0">You haven't connected any social accounts yet.</p>
+                                </div>
+                                {% endif %}
+
+                                <hr>
+
+                                <h6>Connect a New Account</h6>
+                                <div class="socialaccount_providers">
+                                    {% include "socialaccount/snippets/provider_list.html" with process="connect" %}
+                                </div>
+                            </form>
+                            {% else %}
+                            <div class="alert alert-info">
+                                <p class="mb-0">Social account connections are not available at this time.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Activate the first tab by default
+    document.querySelector('.list-group-item').click();
+    
+    // Handle tab navigation
+    const tabLinks = document.querySelectorAll('.list-group-item[data-bs-toggle="list"]');
+    tabLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = this.getAttribute('href');
+            const tab = new bootstrap.Tab(this);
+            tab.show();
+            
+            // Update active state
+            tabLinks.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+});
+</script>
+{% endblock %} 

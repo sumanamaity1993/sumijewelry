@@ -1,0 +1,275 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sumi Jewelry Store{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+        }
+        .navbar-brand img {
+            height: 80px;
+            width: auto;
+            object-fit: contain;
+        }
+        .navbar {
+            padding: 0.75rem 0;
+            min-height: 100px;
+        }
+        .hero-banner {
+            position: relative;
+            background-color: #f8f9fa;
+        }
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('{% static "images/banner.png" %}') center/cover;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        .hero-banner .container {
+            position: relative;
+            z-index: 1;
+        }
+        .product-card {
+            transition: transform 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        .category-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        .category-card img {
+            transition: transform 0.3s;
+        }
+        .category-card:hover img {
+            transform: scale(1.1);
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        @media (max-width: 768px) {
+            .navbar-brand img {
+                height: 60px;
+            }
+            .navbar {
+                min-height: 80px;
+            }
+        }
+        /* Product card title styles */
+        .product-card .card-title {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+            height: 2.8em;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        /* Product card rating styles */
+        .product-card .rating {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .product-card .rating .stars {
+            display: inline-block;
+        }
+        .product-card .rating .stars i {
+            color: #dee2e6;  /* Default gray color for all stars */
+        }
+        .product-card .rating .stars i.fas.fa-star {
+            color: #ffc107;  /* Solid gold color for full stars */
+        }
+        .product-card .rating .stars i.fas.fa-star-half-alt {
+            color: #ffc107;  /* Solid gold color for half stars */
+            position: relative;
+        }
+        .product-card .rating .stars i.fas.fa-star-half-alt::before {
+            color: #ffc107;  /* Ensure the half star is gold */
+        }
+        .product-card .rating .stars i.far.fa-star {
+            color: #dee2e6;  /* Gray color for empty stars */
+        }
+        .product-card .rating .count {
+            color: #6c757d;
+            font-size: 0.85rem;
+            margin-left: 0.25rem;
+        }
+
+        /* Cart and order item title styles */
+        .cart-item .card-title,
+        .order-item h6 {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Product detail page title */
+        .product-detail h1 {
+            font-size: 2rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'shop:home' %}">
+                <img src="{% static 'images/logo.png' %}" alt="Sumi Jewelry Store Logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'shop:home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'shop:product_list' %}">Products</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown">
+                            Categories
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for category in categories %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'shop:product_list_by_category' category.slug %}">
+                                    {{ category.name }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                </ul>
+                
+                <!-- Search Form -->
+                <form class="d-flex me-3" action="{% url 'shop:search' %}" method="get">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Search products...">
+                    <button class="btn btn-outline-primary" type="submit">Search</button>
+                </form>
+                
+                <!-- User Menu -->
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{% url 'shop:cart_detail' %}">
+                            <i class="fas fa-shopping-cart"></i> Cart
+                            {% if cart_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ cart_count }}
+                            </span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'shop:profile' %}">Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'shop:account_settings' %}">Account Settings</a></li>
+                            <li><a class="dropdown-item" href="{% url 'shop:user_orders' %}">Orders</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'account_signup' %}">Sign Up</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="container py-4">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>About Us</h5>
+                    <p>Sumi Jewelry Store offers exquisite jewelry pieces crafted with precision and passion.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'shop:home' %}">Home</a></li>
+                        <li><a href="{% url 'shop:product_list' %}">Products</a></li>
+                        <li><a href="{% url 'shop:cart_detail' %}">Cart</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-phone"></i> +91 98765 43210</li>
+                        <li><i class="fas fa-envelope"></i> info@sumijewelry.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Sumi Jewelry Store, Phoenix Marketcity, Whitefield, Bangalore, Karnataka - 560048</li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p>&copy; {% now "Y" %} Sumi Jewelry Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JavaScript -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

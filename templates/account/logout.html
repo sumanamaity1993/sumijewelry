@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Sign Out - Sumi Jewelry Store{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="text-center mb-4">{% trans "Sign Out" %}</h1>
+                    <p class="text-center">{% trans 'Are you sure you want to sign out?' %}</p>
+
+                    <form method="post" action="{% url 'account_logout' %}">
+                        {% csrf_token %}
+                        {% if redirect_field_value %}
+                        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                        {% endif %}
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" type="submit">{% trans 'Sign Out' %}</button>
+                            <a href="{% url 'shop:home' %}" class="btn btn-outline-secondary">{% trans 'Cancel' %}</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hide the navigation menu on logout page */
+    .navbar {
+        display: none !important;
+    }
+    /* Add some padding to the top since we removed the navbar */
+    body {
+        padding-top: 2rem;
+    }
+</style>
+{% endblock %} 

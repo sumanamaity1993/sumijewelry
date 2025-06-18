@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load shop_extras %}
+
+{% block title %}Checkout - Sumi Jewelry Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Checkout</h1>
+
+    <div class="row">
+        <!-- Checkout Form -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="post" id="checkout-form">
+                        {% csrf_token %}
+                        
+                        <!-- Shipping Information -->
+                        <h4 class="mb-3">Shipping Information</h4>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="address" class="form-label">Shipping Address</label>
+                                <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Payment Information -->
+                        <h4 class="mb-3">Payment Information</h4>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="credit_card" value="credit_card" checked>
+                                    <label class="form-check-label" for="credit_card">
+                                        Credit Card
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="cod" value="cod">
+                                    <label class="form-check-label" for="cod">
+                                        Cash on Delivery
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Credit Card Fields (shown/hidden based on selection) -->
+                            <div id="credit_card_fields">
+                                <div class="col-12">
+                                    <label for="card_number" class="form-label">Card Number</label>
+                                    <input type="text" class="form-control" id="card_number" placeholder="1234 5678 9012 3456">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="expiry" class="form-label">Expiry Date</label>
+                                    <input type="text" class="form-control" id="expiry" placeholder="MM/YY">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="cvv" class="form-label">CVV</label>
+                                    <input type="text" class="form-control" id="cvv" placeholder="123">
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Terms and Conditions -->
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#">Terms and Conditions</a> and <a href="#">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            Place Order
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Cart Items -->
+                    {% for item in cart.items.all %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <div>
+                            <h6 class="mb-0">{{ item.product.name }}</h6>
+                            <small class="text-muted">Qty: {{ item.quantity }}</small>
+                        </div>
+                        <span>₹{{ item.get_cost|indian_currency }}</span>
+                    </div>
+                    {% endfor %}
+
+                    <hr>
+
+                    <!-- Totals -->
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span>₹{{ cart.get_total_cost|indian_currency }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping</span>
+                        <span>{% if cart.get_total_cost >= 999 %}Free{% else %}₹100.00{% endif %}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total</strong>
+                        <strong>₹{% if cart.get_total_cost >= 999 %}{{ cart.get_total_cost|indian_currency }}{% else %}{{ cart.get_total_cost|add:"0"|add:"100"|indian_currency }}{% endif %}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-lock text-success me-2"></i>
+                        Secure Checkout
+                    </h5>
+                    <p class="card-text text-muted">
+                        Your payment information is encrypted and secure. We never store your credit card details.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Basic form validation
+document.getElementById('checkout-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+    
+    if (paymentMethod === 'credit_card') {
+        // Validate card number (simple check)
+        const cardNumber = document.getElementById('card_number').value.replace(/\s/g, '');
+        if (!/^\d{16}$/.test(cardNumber)) {
+            alert('Please enter a valid 16-digit card number');
+            return;
+        }
+        
+        // Validate expiry date
+        const expiry = document.getElementById('expiry').value;
+        if (!/^\d{2}\/\d{2}$/.test(expiry)) {
+            alert('Please enter a valid expiry date (MM/YY)');
+            return;
+        }
+        
+        // Validate CVV
+        const cvv = document.getElementById('cvv').value;
+        if (!/^\d{3,4}$/.test(cvv)) {
+            alert('Please enter a valid CVV');
+            return;
+        }
+    }
+    
+    // If all validations pass, submit the form
+    this.submit();
+});
+
+// Show/hide credit card fields based on payment method
+document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const creditCardFields = document.getElementById('credit_card_fields');
+        const cardInputs = creditCardFields.querySelectorAll('input');
+        
+        if (this.value === 'credit_card') {
+            creditCardFields.style.display = 'block';
+            cardInputs.forEach(input => input.required = true);
+        } else {
+            creditCardFields.style.display = 'none';
+            cardInputs.forEach(input => input.required = false);
+        }
+    });
+});
+
+// Format card number input
+document.getElementById('card_number').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\s/g, '');
+    if (value.length > 16) value = value.slice(0, 16);
+    e.target.value = value.replace(/(\d{4})/g, '$1 ').trim();
+});
+
+// Format expiry date input
+document.getElementById('expiry').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 2) {
+        value = value.slice(0, 2) + '/' + value.slice(2, 4);
+    }
+    e.target.value = value;
+});
+</script>
+{% endblock %}
+{% endblock %} 

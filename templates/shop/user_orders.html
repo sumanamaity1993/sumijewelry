@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load shop_extras %}
+
+{% block title %}My Orders - Sumi Jewelry Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">My Orders</h1>
+
+    {% if orders %}
+    <div class="row">
+        {% for order in orders %}
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">Order #{{ order.id }}</h5>
+                        <small class="text-muted">Placed on {{ order.created_at|date:"F j, Y" }}</small>
+                    </div>
+                    <span class="badge {% if order.status == 'delivered' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% else %}bg-primary{% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <!-- Order Items -->
+                    <div class="row mb-3">
+                        {% for item in order.items.all %}
+                        <div class="col-md-6 mb-2">
+                            <div class="d-flex">
+                                {% if item.product.get_primary_image %}
+                                <img src="{{ item.product.get_primary_image.url }}" class="img-thumbnail me-3" style="width: 80px; height: 80px; object-fit: cover;" alt="{{ item.product.name }}">
+                                {% else %}
+                                <img src="https://via.placeholder.com/80" class="img-thumbnail me-3" alt="{{ item.product.name }}">
+                                {% endif %}
+                                <div>
+                                    <h6 class="mb-1">
+                                        <a href="{% url 'shop:product_detail' item.product.slug %}" class="text-decoration-none">{{ item.product.name }}</a>
+                                    </h6>
+                                    <p class="text-muted mb-0">Quantity: {{ item.quantity }}</p>
+                                    <p class="mb-0">₹{{ item.price|indian_currency }} each</p>
+                                    {% if order.status == 'delivered' %}
+                                        {% with user_review=item.product.reviews.all|filter_reviews|first %}
+                                            {% if user_review %}
+                                                <p class="text-success mb-0 mt-1 small">
+                                                    <i class="fas fa-check-circle"></i> Reviewed
+                                                    {% if not user_review.is_approved %}
+                                                        (pending approval)
+                                                    {% endif %}
+                                                </p>
+                                            {% else %}
+                                                <a href="{% url 'shop:product_detail' item.product.slug %}#reviewForm" class="btn btn-sm btn-outline-primary mt-1">
+                                                    <i class="fas fa-star"></i> Write a Review
+                                                </a>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Shipping Address</h6>
+                            <p class="mb-0">{{ order.address }}</p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <h6>Order Summary</h6>
+                            <p class="mb-1">Subtotal: ₹{{ subtotals|dict_get:order.id|indian_currency }}</p>
+                            <p class="mb-1">Shipping: {% if order.total_amount >= 999 %}Free{% else %}₹100.00{% endif %}</p>
+                            <p class="mb-0"><strong>Total: ₹{{ order.total_amount|indian_currency }}</strong></p>
+                        </div>
+                    </div>
+
+                    <!-- Order Actions -->
+                    <div class="mt-3 text-end">
+                        <a href="{% url 'shop:order_detail' order.id %}" class="btn btn-outline-primary">
+                            View Details
+                        </a>
+                        {% if order.status == 'pending' %}
+                        <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelOrderModal{{ order.id }}">
+                            Cancel Order
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cancel Order Modal -->
+        {% if order.status == 'pending' %}
+        <div class="modal fade" id="cancelOrderModal{{ order.id }}" tabindex="-1" aria-labelledby="cancelOrderModalLabel{{ order.id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cancelOrderModalLabel{{ order.id }}">Cancel Order #{{ order.id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to cancel this order? This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <form method="post" action="{% url 'shop:cancel_order' order.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Cancel Order</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-shopping-bag fa-4x text-muted mb-3"></i>
+        <h3>No Orders Yet</h3>
+        <p class="text-muted">Start shopping to see your orders here!</p>
+        <a href="{% url 'shop:product_list' %}" class="btn btn-primary btn-lg mt-3">
+            Browse Products
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

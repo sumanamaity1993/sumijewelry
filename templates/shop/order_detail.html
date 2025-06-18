@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load shop_extras %}
+
+{% block title %}Order #{{ order.id }} - Sumi Jewelry Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Order Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Order #{{ order.id }}</h1>
+        <span class="badge {% if order.status == 'delivered' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% else %}bg-primary{% endif %}">
+            {{ order.get_status_display }}
+        </span>
+    </div>
+
+    <div class="row">
+        <!-- Order Details -->
+        <div class="col-md-8">
+            <!-- Order Items -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Order Items</h5>
+                </div>
+                <div class="card-body">
+                    {% for item in order.items.all %}
+                    <div class="row mb-4 order-item">
+                        <div class="col-md-2">
+                            {% if item.product.get_primary_image %}
+                            <img src="{{ item.product.get_primary_image.url }}" class="img-fluid rounded" alt="{{ item.product.name }}">
+                            {% else %}
+                            <img src="https://via.placeholder.com/100" class="img-fluid rounded" alt="{{ item.product.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="mb-1">
+                                <a href="{% url 'shop:product_detail' item.product.slug %}" class="text-decoration-none">{{ item.product.name }}</a>
+                            </h6>
+                            <p class="text-muted mb-0">Material: {{ item.product.material }}</p>
+                            <p class="text-muted mb-0">Quantity: {{ item.quantity }}</p>
+                            {% if order.status == 'delivered' %}
+                                {% with user_review=item.product.reviews.all|filter_reviews|first %}
+                                    {% if user_review %}
+                                        <p class="text-success mb-0 mt-2">
+                                            <i class="fas fa-check-circle"></i> You have reviewed this product
+                                            {% if not user_review.is_approved %}
+                                                (pending approval)
+                                            {% endif %}
+                                        </p>
+                                    {% else %}
+                                        <a href="{% url 'shop:product_detail' item.product.slug %}#reviewForm" class="btn btn-sm btn-outline-primary mt-2">
+                                            <i class="fas fa-star"></i> Write a Review
+                                        </a>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <p class="mb-0">₹{{ item.price|indian_currency }} each</p>
+                            <p class="h6">₹{{ item.get_cost|indian_currency }}</p>
+                        </div>
+                    </div>
+                    {% if not forloop.last %}<hr>{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Order Timeline -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Order Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-0">Order Placed</h6>
+                                <small class="text-muted">{{ order.created_at|date:"F j, Y, g:i a" }}</small>
+                            </div>
+                        </div>
+                        {% if order.status != 'pending' %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-0">Processing</h6>
+                                <small class="text-muted">{{ order.updated_at|date:"F j, Y, g:i a" }}</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if order.status == 'shipped' or order.status == 'delivered' %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-info"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-0">Shipped</h6>
+                                {% if order.tracking_number %}
+                                <p class="mb-0">Tracking Number: {{ order.tracking_number }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if order.status == 'delivered' %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-0">Delivered</h6>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if order.status == 'cancelled' %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-danger"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-0">Cancelled</h6>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    {% if order.total_amount < 999 %}
+                        {% with subtotal=order.total_amount|add:"-100" %}
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal</span>
+                                <span>₹{{ subtotal|indian_currency }}</span>
+                            </div>
+                        {% endwith %}
+                    {% else %}
+                        {% with subtotal=order.total_amount %}
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal</span>
+                                <span>₹{{ subtotal|indian_currency }}</span>
+                            </div>
+                        {% endwith %}
+                    {% endif %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping</span>
+                        <span>{% if order.total_amount >= 999 %}Free{% else %}₹100.00{% endif %}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total</strong>
+                        <strong>₹{{ order.total_amount|indian_currency }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Shipping Information</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Name:</strong> {{ order.first_name }} {{ order.last_name }}</p>
+                    <p class="mb-1"><strong>Email:</strong> {{ order.email }}</p>
+                    <p class="mb-1"><strong>Phone:</strong> {{ order.phone }}</p>
+                    <p class="mb-0"><strong>Address:</strong><br>{{ order.address }}</p>
+                </div>
+            </div>
+
+            <!-- Payment Information -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Payment Information</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1">
+                        <strong>Payment Status:</strong>
+                        <span class="badge {% if order.payment_status %}bg-success{% else %}bg-warning{% endif %}">
+                            {% if order.payment_status %}Paid{% else %}Pending{% endif %}
+                        </span>
+                    </p>
+                    <p class="mb-0">
+                        <strong>Payment Method:</strong> {{ order.get_payment_method_display }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="text-center mt-4">
+        <a href="{% url 'shop:user_orders' %}" class="btn btn-outline-primary me-2">
+            <i class="fas fa-arrow-left"></i> Back to Orders
+        </a>
+        {% if order.status == 'pending' %}
+        <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelOrderModal">
+            <i class="fas fa-times"></i> Cancel Order
+        </button>
+        {% endif %}
+        {% if user.is_staff and order.status != 'delivered' and order.status != 'cancelled' %}
+        <form method="post" action="{% url 'shop:mark_order_delivered' order.id %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-check"></i> Mark as Delivered
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- Cancel Order Modal -->
+    {% if order.status == 'pending' %}
+    <div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelOrderModalLabel">Cancel Order #{{ order.id }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to cancel this order? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <form method="post" action="{% url 'shop:cancel_order' order.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Cancel Order</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_css %}
+<style>
+.timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+}
+
+.timeline-item:not(:last-child):before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 15px;
+    height: calc(100% + 5px);
+    width: 1px;
+    background-color: #dee2e6;
+}
+</style>
+{% endblock %}
+{% endblock %} 

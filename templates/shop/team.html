@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Meet Our Team - Sumi Jewelry{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 mb-3">Meet Our Team</h1>
+        <p class="lead text-muted">The passionate artisans and experts behind Sumi Jewelry</p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for member in team_members %}
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-img-top position-relative" style="height: 300px; overflow: hidden;">
+                    {% if member.image %}
+                    <img src="{{ member.image.url }}" alt="{{ member.name }}" class="w-100 h-100 object-fit-cover">
+                    {% else %}
+                    <img src="{% static 'images/default-team.jpg' %}" alt="{{ member.name }}" class="w-100 h-100 object-fit-cover">
+                    {% endif %}
+                </div>
+                <div class="card-body text-center">
+                    <h3 class="card-title h5 mb-1">{{ member.name }}</h3>
+                    <p class="text-muted mb-3">{{ member.position }}</p>
+                    <p class="card-text">{{ member.bio }}</p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <p class="lead">Our team information is coming soon!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

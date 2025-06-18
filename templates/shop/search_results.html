@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load shop_extras %}
+
+{% block title %}Search Results - Sumi Jewelry Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Search Header -->
+    <div class="text-center mb-4">
+        <h1>Search Results</h1>
+        {% if query %}
+        <p class="lead">Showing results for "{{ query }}"</p>
+        {% endif %}
+    </div>
+
+    <!-- Search Results -->
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Refine Search</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="{% url 'shop:search' %}">
+                        <input type="hidden" name="q" value="{{ query }}">
+                        
+                        <!-- Material Filter -->
+                        <div class="mb-3">
+                            <label class="form-label">Material</label>
+                            <select name="material" class="form-select">
+                                <option value="">All Materials</option>
+                                <option value="Gold" {% if request.GET.material == 'Gold' %}selected{% endif %}>Gold</option>
+                                <option value="Silver" {% if request.GET.material == 'Silver' %}selected{% endif %}>Silver</option>
+                                <option value="Platinum" {% if request.GET.material == 'Platinum' %}selected{% endif %}>Platinum</option>
+                            </select>
+                        </div>
+
+                        <!-- Price Range Filter -->
+                        <div class="mb-3">
+                            <label class="form-label">Price Range</label>
+                            <div class="input-group mb-2">
+                                <input type="number" name="min_price" class="form-control" placeholder="Min" value="{{ request.GET.min_price }}">
+                                <input type="number" name="max_price" class="form-control" placeholder="Max" value="{{ request.GET.max_price }}">
+                            </div>
+                        </div>
+
+                        <!-- Sort Filter -->
+                        <div class="mb-3">
+                            <label class="form-label">Sort By</label>
+                            <select name="sort" class="form-select">
+                                <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest</option>
+                                <option value="price_low" {% if request.GET.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                                <option value="price_high" {% if request.GET.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="col-md-9">
+            <div class="row g-4">
+                {% for product in products %}
+                <div class="col-md-4">
+                    {% include "shop/includes/product_card.html" %}
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        No products found matching your search criteria.
+                        <br>
+                        <a href="{% url 'shop:product_list' %}" class="alert-link">Browse all products</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

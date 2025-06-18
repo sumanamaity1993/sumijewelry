@@ -1,0 +1,69 @@
+{% load shop_extras %}
+
+<div class="card product-card h-100">
+    <a href="{% url 'shop:product_detail' product.slug %}" class="text-decoration-none">
+        {% if product.get_primary_image %}
+        <img src="{{ product.get_primary_image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+        {% else %}
+        <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="{{ product.name }}">
+        {% endif %}
+        
+        <!-- Discount Badge -->
+        {% if product.is_discount_active %}
+        <div class="position-absolute top-0 end-0 m-2">
+            <span class="badge bg-danger fs-6">-{{ product.discount_percentage }}%</span>
+        </div>
+        {% endif %}
+    </a>
+    <div class="card-body">
+        <h5 class="card-title">{{ product.name }}</h5>
+        
+        <!-- Rating Display -->
+        {% with approved_reviews=product.reviews.all|filter_reviews %}
+        {% with avg_rating=approved_reviews|avg_rating %}
+        <div class="rating mb-2">
+            <div class="stars">
+                {% for i in "12345"|make_list %}
+                    {% if forloop.counter <= avg_rating|floatformat:0 %}
+                        <i class="fas fa-star"></i>
+                    {% elif forloop.counter|subtract:avg_rating <= 0.5 %}
+                        <i class="fas fa-star-half-alt"></i>
+                    {% else %}
+                        <i class="far fa-star"></i>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <span class="count">({{ approved_reviews|length }} reviews)</span>
+        </div>
+        {% endwith %}
+        {% endwith %}
+        
+        <p class="card-text text-muted">{{ product.material }}</p>
+        
+        <!-- Price Display -->
+        <div class="price-section">
+            {% if product.is_discount_active %}
+                <p class="card-text">
+                    <span class="fw-bold text-danger fs-5">{{ product.get_discounted_price|indian_currency }}</span>
+                    <span class="text-muted text-decoration-line-through ms-2">{{ product.price|indian_currency }}</span>
+                </p>
+                <p class="card-text text-success small">You save {{ product.get_discount_amount|indian_currency }}</p>
+            {% else %}
+                <p class="card-text fw-bold fs-5">{{ product.price|indian_currency }}</p>
+            {% endif %}
+        </div>
+        
+        <div class="d-grid gap-2">
+            <a href="{% url 'shop:product_detail' product.slug %}" class="btn btn-outline-primary">View Details</a>
+            {% if product.stock > 0 %}
+            <form method="post" action="{% url 'shop:cart_add' product.id %}" class="d-inline">
+                {% csrf_token %}
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" class="btn btn-primary w-100">Add to Cart</button>
+            </form>
+            {% else %}
+            <button class="btn btn-secondary w-100" disabled>Out of Stock</button>
+            {% endif %}
+        </div>
+    </div>
+</div> 

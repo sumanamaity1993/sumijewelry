@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load shop_extras %}
+
+{% block title %}
+{% if category %}{{ category.name }} - {% endif %}Products - Sumi Jewelry Store
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Category Header -->
+    {% if category %}
+    <div class="py-4 text-center">
+        <h1 class="display-5">{{ category.name }}</h1>
+        {% if category.description %}
+        <p class="lead">{{ category.description }}</p>
+        {% endif %}
+    </div>
+    {% else %}
+    <h1 class="py-4 text-center">All Products</h1>
+    {% endif %}
+
+    <!-- Mobile Filter Toggle Button -->
+    <div class="d-md-none mb-3">
+        <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#mobileFilters" aria-expanded="false" aria-controls="mobileFilters">
+            <i class="fas fa-filter me-2"></i>Show Filters & Categories
+        </button>
+    </div>
+
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-md-3">
+            <!-- Mobile Collapsible Filters -->
+            <div class="collapse d-md-block" id="mobileFilters">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Filters</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" action="{% if category %}{% url 'shop:product_list_by_category' category.slug %}{% else %}{% url 'shop:product_list' %}{% endif %}">
+                            <!-- Material Filter -->
+                            <div class="mb-3">
+                                <label class="form-label">Material</label>
+                                <select name="material" class="form-select">
+                                    <option value="">All Materials</option>
+                                    <option value="Gold" {% if request.GET.material == 'Gold' %}selected{% endif %}>Gold</option>
+                                    <option value="Silver" {% if request.GET.material == 'Silver' %}selected{% endif %}>Silver</option>
+                                    <option value="Platinum" {% if request.GET.material == 'Platinum' %}selected{% endif %}>Platinum</option>
+                                </select>
+                            </div>
+
+                            <!-- Price Range Filter -->
+                            <div class="mb-3">
+                                <label class="form-label">Price Range</label>
+                                <div class="input-group mb-2">
+                                    <input type="number" name="min_price" class="form-control" placeholder="Min" value="{{ request.GET.min_price }}">
+                                    <input type="number" name="max_price" class="form-control" placeholder="Max" value="{{ request.GET.max_price }}">
+                                </div>
+                            </div>
+
+                            <!-- Sort Filter -->
+                            <div class="mb-3">
+                                <label class="form-label">Sort By</label>
+                                <select name="sort" class="form-select">
+                                    <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest</option>
+                                    <option value="price_low" {% if request.GET.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                                    <option value="price_high" {% if request.GET.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Categories List -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Categories</h5>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'shop:product_list' %}" class="list-group-item list-group-item-action {% if not category %}active{% endif %}">
+                            All Products
+                        </a>
+                        {% for cat in categories %}
+                        <a href="{% url 'shop:product_list_by_category' cat.slug %}" 
+                           class="list-group-item list-group-item-action {% if category.slug == cat.slug %}active{% endif %}">
+                            {{ cat.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="col-md-9">
+            <div class="row g-4">
+                {% for product in products %}
+                <div class="col-md-4">
+                    {% include "shop/includes/product_card.html" %}
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        No products found matching your criteria.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if products.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if products.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ products.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            Previous
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                    {% endif %}
+
+                    {% for i in products.paginator.page_range %}
+                    {% if products.number == i %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ i }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            {{ i }}
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if products.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ products.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            Next
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript to handle mobile filter toggle -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update button text when filters are toggled
+    const filterButton = document.querySelector('[data-bs-toggle="collapse"]');
+    const filterCollapse = document.getElementById('mobileFilters');
+    
+    if (filterButton && filterCollapse) {
+        filterCollapse.addEventListener('show.bs.collapse', function() {
+            filterButton.innerHTML = '<i class="fas fa-filter me-2"></i>Hide Filters & Categories';
+        });
+        
+        filterCollapse.addEventListener('hide.bs.collapse', function() {
+            filterButton.innerHTML = '<i class="fas fa-filter me-2"></i>Show Filters & Categories';
+        });
+    }
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load shop_extras %}
+
+{% block title %}Shopping Cart - Sumi Jewelry Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Shopping Cart</h1>
+
+    {% if cart.items.exists %}
+    <div class="row">
+        <!-- Cart Items -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    {% for item in cart.items.all %}
+                    <div class="row mb-4 cart-item">
+                        <div class="col-md-3">
+                            {% if item.product.image %}
+                            <img src="{{ item.product.image.url }}" class="img-fluid rounded" alt="{{ item.product.name }}">
+                            {% else %}
+                            <img src="https://via.placeholder.com/150" class="img-fluid rounded" alt="{{ item.product.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="card-title">{{ item.product.name }}</h5>
+                            <p class="text-muted">Material: {{ item.product.material }}</p>
+                            
+                            <!-- Price Display -->
+                            <div class="mb-2">
+                                {% if item.price < item.product.price %}
+                                    <p class="text-muted mb-1">
+                                        <span class="text-decoration-line-through">₹{{ item.product.price|indian_currency }}</span>
+                                        <span class="text-danger fw-bold ms-2">₹{{ item.price|indian_currency }}</span>
+                                    </p>
+                                    <p class="text-success small mb-0">
+                                        <i class="fas fa-savings me-1"></i>
+                                        You saved ₹{{ item.product.price|subtract:item.price|indian_currency }}
+                                    </p>
+                                {% else %}
+                                    <p class="text-muted mb-0">Price: ₹{{ item.price|indian_currency }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Update Quantity Form -->
+                            <form method="post" action="{% url 'shop:cart_update' item.product.id %}" class="d-flex align-items-center">
+                                {% csrf_token %}
+                                <div class="input-group" style="width: 150px;">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="decrementQuantity(this)">-</button>
+                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" 
+                                           class="form-control text-center" onchange="this.form.submit()">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="incrementQuantity(this)">+</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <p class="h5">₹{{ item.get_cost|indian_currency }}</p>
+                            <a href="{% url 'shop:cart_remove' item.product.id %}" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-trash"></i> Remove
+                            </a>
+                        </div>
+                    </div>
+                    {% if not forloop.last %}<hr>{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span>₹{{ cart.get_total_cost|indian_currency }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping</span>
+                        <span>{% if cart.get_total_cost >= 999 %}Free{% else %}₹100.00{% endif %}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total</strong>
+                        <strong>₹{% if cart.get_total_cost >= 999 %}{{ cart.get_total_cost|indian_currency }}{% else %}{{ cart.get_total_cost|add:"0"|add:"100"|indian_currency }}{% endif %}</strong>
+                    </div>
+                    <a href="{% url 'shop:checkout' %}" class="btn btn-primary w-100">
+                        Proceed to Checkout
+                    </a>
+                </div>
+            </div>
+
+            <!-- Continue Shopping -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">Continue Shopping</h5>
+                    <a href="{% url 'shop:product_list' %}" class="btn btn-outline-primary w-100">
+                        Browse Products
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+        <h3>Your cart is empty</h3>
+        <p class="text-muted">Add some beautiful jewelry to your cart!</p>
+        <a href="{% url 'shop:product_list' %}" class="btn btn-primary btn-lg mt-3">
+            Start Shopping
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+function incrementQuantity(button) {
+    const input = button.parentElement.querySelector('input');
+    const max = parseInt(input.getAttribute('max'));
+    const currentValue = parseInt(input.value);
+    if (currentValue < max) {
+        input.value = currentValue + 1;
+        input.form.submit();
+    }
+}
+
+function decrementQuantity(button) {
+    const input = button.parentElement.querySelector('input');
+    const currentValue = parseInt(input.value);
+    if (currentValue > 1) {
+        input.value = currentValue - 1;
+        input.form.submit();
+    }
+}
+</script>
+{% endblock %}
+{% endblock %} 
