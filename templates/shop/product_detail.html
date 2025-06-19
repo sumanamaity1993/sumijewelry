@@ -166,10 +166,10 @@
                 <!-- Price Display -->
                 {% if product.is_discount_active %}
                     <div class="mb-3">
-                        <h4 class="text-danger mb-2">₹{{ product.get_discounted_price|floatformat:2 }}</h4>
+                        <h4 class="text-success mb-2">₹{{ product.get_discounted_price|floatformat:2 }}</h4>
                         <div class="d-flex align-items-center">
                             <span class="text-muted text-decoration-line-through me-3">₹{{ product.price|floatformat:2 }}</span>
-                            <span class="badge bg-danger fs-6">-{{ product.discount_percentage }}% OFF</span>
+                            <span class="badge bg-success fs-6">-{{ product.discount_percentage }}% OFF</span>
                         </div>
                         <p class="text-success mt-2 mb-0">
                             <i class="fas fa-savings me-1"></i>

@@ -8,12 +8,7 @@
         <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="{{ product.name }}">
         {% endif %}
         
-        <!-- Discount Badge -->
-        {% if product.is_discount_active %}
-        <div class="position-absolute top-0 end-0 m-2">
-            <span class="badge bg-danger fs-6">-{{ product.discount_percentage }}%</span>
-        </div>
-        {% endif %}
+        <!-- Discount Badge removed -->
     </a>
     <div class="card-body">
         <h5 class="card-title">{{ product.name }}</h5>
@@ -44,10 +39,10 @@
         <div class="price-section">
             {% if product.is_discount_active %}
                 <p class="card-text">
-                    <span class="fw-bold text-danger fs-5">{{ product.get_discounted_price|indian_currency }}</span>
+                    <span class="fw-bold text-success fs-5">{{ product.get_discounted_price|indian_currency }}</span>
                     <span class="text-muted text-decoration-line-through ms-2">{{ product.price|indian_currency }}</span>
+                    <span class="badge bg-success ms-2 align-middle">-{{ product.discount_percentage }}%</span>
                 </p>
-                <p class="card-text text-success small">You save {{ product.get_discount_amount|indian_currency }}</p>
             {% else %}
                 <p class="card-text fw-bold fs-5">{{ product.price|indian_currency }}</p>
             {% endif %}
