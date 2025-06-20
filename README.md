@@ -36,6 +36,73 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+## Django Management Commands
+
+This project includes several custom Django management commands for data management and setup.
+
+### Available Commands
+
+#### Team Management
+```bash
+# Add default team members (CEO and Developer)
+python manage.py add_team_members
+
+# Remove all team members (requires confirmation)
+python manage.py cleanup_team --confirm
+```
+
+#### Data Management
+```bash
+# Update product prices (if needed)
+python manage.py update_prices
+```
+
+#### Data Backup/Restore
+```bash
+# Use the data management script for backups
+python manage_data.py
+```
+
+### Command Details
+
+- **`add_team_members`**: Creates default team members (Sumana Maity as CEO and Tapas as Developer)
+- **`cleanup_team`**: Removes all team members from the database (use with caution)
+- **`update_prices`**: Updates product prices (if price update logic is implemented)
+- **`manage_data.py`**: Interactive script for database and media file backup/restore
+
+### Safety Features
+- The `cleanup_team` command requires the `--confirm` flag to prevent accidental deletion
+- All commands provide clear feedback about what actions were performed
+- Commands follow Django's standard output formatting
+
+## Data Management Strategy
+
+This project uses a **separate database and media management approach** optimized for free hosting platforms like PythonAnywhere.
+
+### Database Management
+- **Local Development**: Uses SQLite database (`db.sqlite3`) - ignored by git
+- **Production**: Uses separate database on hosting platform
+- **Sync Method**: Manual management through Django admin
+- **Backup**: Download production database when needed for local testing
+
+### Media Files Management
+- **Product Images**: Tracked in git (in `media/` directory)
+- **Automatic Sync**: Images are automatically deployed with code
+- **Benefits**: Product images are version-controlled and always available
+
+### Workflow
+1. **Add products locally** → Test in Django admin
+2. **Add same products in production** → Through production Django admin
+3. **Upload images locally** → They sync automatically via git
+4. **Download production data** → When needed for local testing
+
+### Benefits of This Approach
+✅ **Simple and reliable** - No complex sync processes
+✅ **Free hosting compatible** - Works within PythonAnywhere free tier limits
+✅ **Full control** - You decide when to sync data
+✅ **No risk** - Can't accidentally overwrite production data
+✅ **Cost-effective** - Perfect for 3-month free trial period
+
 ## Deployment to PythonAnywhere
 
 1. Sign up for a PythonAnywhere account at https://www.pythonanywhere.com/
