@@ -4,116 +4,449 @@
 {% block title %}Shopping Cart - Sumi Jewelry Store{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <h1 class="mb-4">Shopping Cart</h1>
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-shopping-cart fa-2x text-primary me-3"></i>
+                <div>
+                    <h1 class="h2 mb-1 fw-bold">Shopping Cart</h1>
+                    <p class="text-muted mb-0">Review your items and proceed to checkout</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {% if cart.items.exists %}
     <div class="row">
         <!-- Cart Items -->
-        <div class="col-md-8">
-            <div class="card mb-4">
-                <div class="card-body">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0" style="border-radius: 15px;">
+                <div class="card-header bg-white border-0 py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-box me-2 text-primary"></i>
+                        Cart Items ({{ cart.get_total_items }})
+                    </h5>
+                </div>
+                <div class="card-body p-0">
                     {% for item in cart.items.all %}
-                    <div class="row mb-4 cart-item">
-                        <div class="col-md-3">
-                            {% if item.product.image %}
-                            <img src="{{ item.product.image.url }}" class="img-fluid rounded" alt="{{ item.product.name }}">
-                            {% else %}
-                            <img src="https://via.placeholder.com/150" class="img-fluid rounded" alt="{{ item.product.name }}">
-                            {% endif %}
-                        </div>
-                        <div class="col-md-6">
-                            <h5 class="card-title">{{ item.product.name }}</h5>
-                            <p class="text-muted">Material: {{ item.product.material }}</p>
-                            
-                            <!-- Price Display -->
-                            <div class="mb-2">
-                                {% if item.price < item.product.price %}
-                                    <p class="text-muted mb-1">
-                                        <span class="text-decoration-line-through">₹{{ item.product.price|indian_currency }}</span>
-                                        <span class="text-danger fw-bold ms-2">₹{{ item.price|indian_currency }}</span>
-                                    </p>
-                                    <p class="text-success small mb-0">
-                                        <i class="fas fa-savings me-1"></i>
-                                        You saved ₹{{ item.product.price|subtract:item.price|indian_currency }}
-                                    </p>
-                                {% else %}
-                                    <p class="text-muted mb-0">Price: ₹{{ item.price|indian_currency }}</p>
-                                {% endif %}
+                    <div class="cart-item p-4 {% if not forloop.last %}border-bottom{% endif %}" style="transition: all 0.3s ease;">
+                        <div class="row align-items-center">
+                            <!-- Product Image -->
+                            <div class="col-md-3 col-sm-4">
+                                <a href="{{ item.product.get_absolute_url }}" class="text-decoration-none">
+                                    <div class="position-relative">
+                                        {% if item.product.get_primary_image %}
+                                        <img src="{{ item.product.get_primary_image.url }}" 
+                                             class="img-fluid rounded shadow-sm" 
+                                             alt="{{ item.product.name }}"
+                                             style="width: 100%; height: 120px; object-fit: cover;">
+                                        {% else %}
+                                        <img src="https://via.placeholder.com/200x120/f8f9fa/6c757d?text=No+Image" 
+                                             class="img-fluid rounded shadow-sm" 
+                                             alt="{{ item.product.name }}">
+                                        {% endif %}
+                                        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-0 rounded" 
+                                             style="transition: opacity 0.3s ease; pointer-events: none;"></div>
+                                    </div>
+                                </a>
                             </div>
                             
-                            <!-- Update Quantity Form -->
-                            <form method="post" action="{% url 'shop:cart_update' item.product.id %}" class="d-flex align-items-center">
-                                {% csrf_token %}
-                                <div class="input-group" style="width: 150px;">
-                                    <button type="button" class="btn btn-outline-secondary" onclick="decrementQuantity(this)">-</button>
-                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" 
-                                           class="form-control text-center" onchange="this.form.submit()">
-                                    <button type="button" class="btn btn-outline-secondary" onclick="incrementQuantity(this)">+</button>
+                            <!-- Product Details -->
+                            <div class="col-md-6 col-sm-5">
+                                <div class="ps-md-3">
+                                    <a href="{{ item.product.get_absolute_url }}" class="text-decoration-none">
+                                        <h5 class="card-title text-dark mb-2 fw-bold">{{ item.product.name }}</h5>
+                                    </a>
+                                    <p class="text-muted small mb-2">
+                                        <i class="fas fa-gem me-1"></i>
+                                        Material: {{ item.product.material }}
+                                    </p>
+                                    
+                                    <!-- Price Display -->
+                                    <div class="mb-3">
+                                        {% if item.price < item.product.price %}
+                                            <div class="d-flex align-items-center">
+                                                <span class="text-decoration-line-through text-muted me-2">₹{{ item.product.price|indian_currency }}</span>
+                                                <span class="text-success fw-bold fs-5">₹{{ item.price|indian_currency }}</span>
+                                                <span class="badge bg-success ms-2">
+                                                    -{{ item.product.discount_percentage }}%
+                                                </span>
+                                            </div>
+                                        {% else %}
+                                            <span class="text-dark fw-bold fs-5">₹{{ item.price|indian_currency }}</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            </form>
-                        </div>
-                        <div class="col-md-3 text-end">
-                            <p class="h5">₹{{ item.get_cost|indian_currency }}</p>
-                            <a href="{% url 'shop:cart_remove' item.product.id %}" class="btn btn-outline-danger btn-sm">
-                                <i class="fas fa-trash"></i> Remove
-                            </a>
+                            </div>
+                            
+                            <!-- Quantity and Actions -->
+                            <div class="col-md-3 col-sm-3">
+                                <div class="text-end">
+                                    <!-- Quantity Controls -->
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-muted">Quantity</label>
+                                        <form method="post" action="{% url 'shop:cart_update' item.product.id %}" class="d-flex align-items-center justify-content-end">
+                                            {% csrf_token %}
+                                            <div class="input-group" style="width: 120px;">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="decrementQuantity(this)">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" 
+                                                       class="form-control form-control-sm text-center border-secondary" 
+                                                       onchange="this.form.submit()"
+                                                       style="border-left: 0; border-right: 0;">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="incrementQuantity(this)">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    
+                                    <!-- Total Price -->
+                                    <div class="mb-3">
+                                        <span class="fw-bold fs-5 text-primary">₹{{ item.get_cost|indian_currency }}</span>
+                                    </div>
+                                    
+                                    <!-- Remove Button -->
+                                    <a href="{% url 'shop:cart_remove' item.product.id %}" 
+                                       class="btn btn-outline-danger btn-sm remove-item-btn"
+                                       data-product-name="{{ item.product.name }}"
+                                       onclick="return confirmRemoveItem(this, '{{ item.product.name }}')">
+                                        <i class="fas fa-trash me-1"></i>
+                                        Remove
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    {% if not forloop.last %}<hr>{% endif %}
                     {% endfor %}
                 </div>
             </div>
         </div>
 
         <!-- Order Summary -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Order Summary</h5>
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0" style="border-radius: 15px; position: sticky; top: 20px;">
+                <div class="card-header bg-primary text-white border-0 py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-receipt me-2"></i>
+                        Order Summary
+                    </h5>
                 </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Subtotal</span>
-                        <span>₹{{ cart.get_total_cost|indian_currency }}</span>
+                <div class="card-body p-4">
+                    <!-- Summary Details -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted">Subtotal ({{ cart.get_total_items }} items)</span>
+                            <span class="fw-bold">₹{{ cart.get_total_cost|indian_currency }}</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted">
+                                <i class="fas fa-shipping-fast me-1"></i>
+                                Shipping
+                            </span>
+                            <span class="fw-bold">
+                                {% if cart.get_total_cost >= 999 %}
+                                    <span class="text-success">Free</span>
+                                {% else %}
+                                    ₹100.00
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        {% if cart.get_total_cost < 999 %}
+                        <div class="alert alert-info small mb-3" style="border-radius: 10px;">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Add ₹{{ 999|subtract:cart.get_total_cost|indian_currency }} more for free shipping!
+                        </div>
+                        {% endif %}
+                        
+                        <hr class="my-3">
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <span class="fw-bold fs-5">Total</span>
+                            <span class="fw-bold fs-5 text-primary">
+                                ₹{% if cart.get_total_cost >= 999 %}{{ cart.get_total_cost|indian_currency }}{% else %}{{ cart.get_total_cost|add:"0"|add:"100"|indian_currency }}{% endif %}
+                            </span>
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Shipping</span>
-                        <span>{% if cart.get_total_cost >= 999 %}Free{% else %}₹100.00{% endif %}</span>
+                    
+                    <!-- Checkout Button -->
+                    <div class="d-grid mb-3">
+                        <a href="{% url 'shop:checkout' %}" class="btn btn-primary btn-lg" style="border-radius: 12px; padding: 12px;">
+                            <i class="fas fa-credit-card me-2"></i>
+                            Proceed to Checkout
+                        </a>
                     </div>
-                    <hr>
-                    <div class="d-flex justify-content-between mb-3">
-                        <strong>Total</strong>
-                        <strong>₹{% if cart.get_total_cost >= 999 %}{{ cart.get_total_cost|indian_currency }}{% else %}{{ cart.get_total_cost|add:"0"|add:"100"|indian_currency }}{% endif %}</strong>
+                    
+                    <!-- Continue Shopping -->
+                    <div class="d-grid">
+                        <a href="{% url 'shop:product_list' %}" class="btn btn-outline-primary" style="border-radius: 12px;">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Continue Shopping
+                        </a>
                     </div>
-                    <a href="{% url 'shop:checkout' %}" class="btn btn-primary w-100">
-                        Proceed to Checkout
-                    </a>
                 </div>
             </div>
-
-            <!-- Continue Shopping -->
-            <div class="card mt-4">
-                <div class="card-body">
-                    <h5 class="card-title">Continue Shopping</h5>
-                    <a href="{% url 'shop:product_list' %}" class="btn btn-outline-primary w-100">
-                        Browse Products
-                    </a>
+            
+            <!-- Security Info -->
+            <div class="card mt-3 border-0 shadow-sm" style="border-radius: 15px;">
+                <div class="card-body p-3 text-center">
+                    <div class="row">
+                        <div class="col-4">
+                            <i class="fas fa-shield-alt text-success fa-lg mb-2"></i>
+                            <p class="small mb-0">Secure</p>
+                        </div>
+                        <div class="col-4">
+                            <i class="fas fa-shipping-fast text-primary fa-lg mb-2"></i>
+                            <p class="small mb-0">Fast Delivery</p>
+                        </div>
+                        <div class="col-4">
+                            <i class="fas fa-undo text-info fa-lg mb-2"></i>
+                            <p class="small mb-0">Easy Returns</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     {% else %}
+    <!-- Empty Cart -->
     <div class="text-center py-5">
-        <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
-        <h3>Your cart is empty</h3>
-        <p class="text-muted">Add some beautiful jewelry to your cart!</p>
-        <a href="{% url 'shop:product_list' %}" class="btn btn-primary btn-lg mt-3">
-            Start Shopping
-        </a>
+        <div class="card border-0 shadow-sm" style="border-radius: 20px; max-width: 500px; margin: 0 auto;">
+            <div class="card-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                    <h3 class="fw-bold text-dark mb-3">Your cart is empty</h3>
+                    <p class="text-muted mb-4">Looks like you haven't added any beautiful jewelry to your cart yet!</p>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'shop:product_list' %}" class="btn btn-primary btn-lg" style="border-radius: 12px;">
+                        <i class="fas fa-gem me-2"></i>
+                        Start Shopping
+                    </a>
+                    <a href="{% url 'shop:home' %}" class="btn btn-outline-primary" style="border-radius: 12px;">
+                        <i class="fas fa-home me-2"></i>
+                        Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
     {% endif %}
 </div>
+
+<style>
+.cart-item:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+.input-group .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+@media (max-width: 768px) {
+    .cart-item {
+        padding: 1rem !important;
+    }
+    
+    .col-md-3.col-sm-4 {
+        margin-bottom: 1rem;
+    }
+    
+    .container {
+        padding: 0 1rem;
+    }
+    
+    .py-5 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1rem !important;
+        font-size: 1rem;
+    }
+    
+    .input-group {
+        width: 100% !important;
+        max-width: 200px;
+    }
+    
+    .text-end {
+        text-align: left !important;
+    }
+    
+    .col-md-3.col-sm-3 {
+        margin-top: 1rem;
+    }
+    
+    .ps-md-3 {
+        padding-left: 0 !important;
+    }
+    
+    .h2 {
+        font-size: 1.5rem !important;
+    }
+    
+    .fa-2x {
+        font-size: 1.5em !important;
+    }
+    
+    .position-sticky {
+        position: static !important;
+        top: auto !important;
+    }
+    
+    .card-body.p-4 {
+        padding: 1.5rem !important;
+    }
+    
+    .d-flex.align-items-center {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .d-flex.align-items-center .fa-2x {
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .cart-item {
+        padding: 0.75rem !important;
+    }
+    
+    .container {
+        padding: 0 0.5rem;
+    }
+    
+    .py-5 {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+    
+    .btn-lg {
+        padding: 0.875rem 1rem !important;
+    }
+    
+    .input-group {
+        max-width: 150px;
+    }
+    
+    .h2 {
+        font-size: 1.25rem !important;
+    }
+    
+    .card-body.p-4 {
+        padding: 1rem !important;
+    }
+    
+    .btn-sm {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .fs-5 {
+        font-size: 1rem !important;
+    }
+    
+    .mb-3 {
+        margin-bottom: 0.75rem !important;
+    }
+    
+    .mb-4 {
+        margin-bottom: 1rem !important;
+    }
+    
+    /* Mobile-specific improvements */
+    .cart-item img {
+        height: 100px !important;
+        width: 100% !important;
+        object-fit: cover;
+    }
+    
+    .btn {
+        min-height: 44px; /* iOS touch target minimum */
+    }
+    
+    .form-control {
+        min-height: 44px; /* iOS touch target minimum */
+    }
+    
+    .input-group .btn {
+        min-width: 44px;
+    }
+    
+    /* Improve mobile navigation */
+    .d-grid {
+        gap: 0.5rem;
+    }
+    
+    /* Better mobile spacing */
+    .row > div {
+        margin-bottom: 1rem;
+    }
+    
+    /* Mobile-friendly badges */
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.5rem;
+    }
+    
+    /* Mobile-optimized text */
+    .small {
+        font-size: 0.875rem;
+    }
+    
+    /* Better mobile card spacing */
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    /* Mobile-friendly buttons */
+    .btn-sm {
+        min-height: 38px;
+        padding: 0.5rem 0.75rem;
+    }
+}
+</style>
 
 {% block extra_js %}
 <script>
@@ -124,6 +457,9 @@ function incrementQuantity(button) {
     if (currentValue < max) {
         input.value = currentValue + 1;
         input.form.submit();
+    } else {
+        // Show feedback when max is reached
+        showToast('Maximum available quantity reached', 'info');
     }
 }
 
@@ -133,6 +469,161 @@ function decrementQuantity(button) {
     if (currentValue > 1) {
         input.value = currentValue - 1;
         input.form.submit();
+    } else {
+        // Show confirmation for removing the last item
+        if (confirm('This will remove the item from your cart. Continue?')) {
+            input.value = 0;
+            input.form.submit();
+        }
+    }
+}
+
+// Toast notification function
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast-notification toast-${type}`;
+    toast.innerHTML = `
+        <div class="toast-content">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+            ${message}
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Show toast
+    setTimeout(() => toast.classList.add('show'), 100);
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Add CSS for toast notifications
+const toastStyles = document.createElement('style');
+toastStyles.textContent = `
+    .toast-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: white;
+        border-radius: 10px;
+        padding: 1rem 1.5rem;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        z-index: 9999;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        border-left: 4px solid #28a745;
+        max-width: 300px;
+    }
+    
+    .toast-notification.show {
+        transform: translateX(0);
+    }
+    
+    .toast-notification.toast-success {
+        border-left-color: #28a745;
+    }
+    
+    .toast-notification.toast-error {
+        border-left-color: #dc3545;
+    }
+    
+    .toast-notification.toast-info {
+        border-left-color: #17a2b8;
+    }
+    
+    .toast-content {
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+    }
+    
+    .toast-success .toast-content i {
+        color: #28a745;
+    }
+    
+    .toast-error .toast-content i {
+        color: #dc3545;
+    }
+    
+    .toast-info .toast-content i {
+        color: #17a2b8;
+    }
+    
+    @media (max-width: 768px) {
+        .toast-notification {
+            top: 10px;
+            right: 10px;
+            left: 10px;
+            max-width: none;
+        }
+    }
+`;
+document.head.appendChild(toastStyles);
+
+// Add hover effect to product images
+document.addEventListener('DOMContentLoaded', function() {
+    const productImages = document.querySelectorAll('.cart-item img');
+    productImages.forEach(img => {
+        img.addEventListener('mouseenter', function() {
+            this.parentElement.querySelector('.position-absolute').style.opacity = '0.1';
+        });
+        img.addEventListener('mouseleave', function() {
+            this.parentElement.querySelector('.position-absolute').style.opacity = '0';
+        });
+    });
+    
+    // Handle remove item buttons
+    const removeButtons = document.querySelectorAll('.remove-item-btn');
+    removeButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const productName = this.getAttribute('data-product-name') || 'this item';
+            if (!confirm(`Are you sure you want to remove ${productName} from your cart?`)) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Show loading state
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Removing...';
+            this.disabled = true;
+            
+            // Update cart count immediately for better UX
+            updateCartCountOnRemove();
+        });
+    });
+});
+
+// Function to confirm item removal
+function confirmRemoveItem(button, productName) {
+    if (confirm(`Are you sure you want to remove ${productName} from your cart?`)) {
+        // Show loading state
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Removing...';
+        button.disabled = true;
+        
+        // Update cart count immediately for better UX
+        updateCartCountOnRemove();
+        
+        return true;
+    }
+    return false;
+}
+
+// Function to handle cart count when items are removed
+function updateCartCountOnRemove() {
+    const cartBadge = document.querySelector('.navbar-nav .nav-link[href*="cart"] .badge');
+    if (cartBadge) {
+        const currentCount = parseInt(cartBadge.textContent) || 0;
+        const newCount = Math.max(0, currentCount - 1);
+        
+        if (newCount > 0) {
+            cartBadge.textContent = newCount;
+        } else {
+            // Hide badge if count is 0
+            cartBadge.style.display = 'none';
+        }
     }
 }
 </script>

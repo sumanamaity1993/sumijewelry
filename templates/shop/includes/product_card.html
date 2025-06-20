@@ -1,64 +1,339 @@
 {% load shop_extras %}
 
-<div class="card product-card h-100">
-    <a href="{% url 'shop:product_detail' product.slug %}" class="text-decoration-none">
-        {% if product.get_primary_image %}
-        <img src="{{ product.get_primary_image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
-        {% else %}
-        <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="{{ product.name }}">
-        {% endif %}
+<div class="card product-card h-100 border-0 shadow-sm" style="border-radius: 15px; transition: all 0.3s ease;">
+    <!-- Product Image -->
+    <div class="position-relative overflow-hidden" style="border-radius: 15px 15px 0 0;">
+        <a href="{% url 'shop:product_detail' product.slug %}" class="text-decoration-none">
+            {% if product.get_primary_image %}
+            <img src="{{ product.get_primary_image.url }}" 
+                 class="card-img-top" 
+                 alt="{{ product.name }}"
+                 style="height: 250px; object-fit: cover; transition: transform 0.3s ease;">
+            {% else %}
+            <img src="https://via.placeholder.com/300x250/f8f9fa/6c757d?text=No+Image" 
+                 class="card-img-top" 
+                 alt="{{ product.name }}"
+                 style="height: 250px; object-fit: cover;">
+            {% endif %}
+        </a>
+    </div>
+    
+    <!-- Card Body -->
+    <div class="card-body d-flex flex-column p-4">
+        <!-- Product Title -->
+        <h5 class="card-title fw-bold text-dark mb-2">{{ product.name }}</h5>
         
-        <!-- Discount Badge removed -->
-    </a>
-    <div class="card-body">
-        <h5 class="card-title">{{ product.name }}</h5>
-        
-        <!-- Rating Display -->
-        {% with approved_reviews=product.reviews.all|filter_reviews %}
-        {% with avg_rating=approved_reviews|avg_rating %}
+        <!-- Rating -->
+        {% if product.avg_rating or product.review_count > 0 %}
         <div class="rating mb-2">
             <div class="stars">
-                {% for i in "12345"|make_list %}
-                    {% if forloop.counter <= avg_rating|floatformat:0 %}
+                {% for i in "12345" %}
+                    {% if forloop.counter <= product.avg_rating|floatformat:0 %}
                         <i class="fas fa-star"></i>
-                    {% elif forloop.counter|subtract:avg_rating <= 0.5 %}
+                    {% elif forloop.counter == product.avg_rating|floatformat:0|add:1 and product.avg_rating|floatformat:0 != product.avg_rating %}
                         <i class="fas fa-star-half-alt"></i>
                     {% else %}
                         <i class="far fa-star"></i>
                     {% endif %}
                 {% endfor %}
             </div>
-            <span class="count">({{ approved_reviews|length }} reviews)</span>
+            <span class="count">({{ product.review_count }})</span>
         </div>
-        {% endwith %}
-        {% endwith %}
+        {% else %}
+        <div class="rating mb-2">
+            <span class="text-muted small">No reviews yet</span>
+        </div>
+        {% endif %}
         
-        <p class="card-text text-muted">{{ product.material }}</p>
-        
-        <!-- Price Display -->
-        <div class="price-section">
+        <!-- Price Section -->
+        <div class="price-section mb-3">
             {% if product.is_discount_active %}
-                <p class="card-text">
-                    <span class="fw-bold text-success fs-5">{{ product.get_discounted_price|indian_currency }}</span>
-                    <span class="text-muted text-decoration-line-through ms-2">{{ product.price|indian_currency }}</span>
-                    <span class="badge bg-success ms-2 align-middle">-{{ product.discount_percentage }}%</span>
-                </p>
+                <div class="d-flex align-items-center flex-wrap">
+                    <span class="fw-bold text-success fs-4 me-2">{{ product.get_discounted_price|indian_currency }}</span>
+                    <span class="text-muted text-decoration-line-through me-2">{{ product.price|indian_currency }}</span>
+                    <span class="badge bg-success">-{{ product.discount_percentage }}%</span>
+                </div>
             {% else %}
-                <p class="card-text fw-bold fs-5">{{ product.price|indian_currency }}</p>
+                <p class="card-text fw-bold fs-4 mb-1">{{ product.price|indian_currency }}</p>
             {% endif %}
         </div>
         
-        <div class="d-grid gap-2">
-            <a href="{% url 'shop:product_detail' product.slug %}" class="btn btn-outline-primary">View Details</a>
+        <!-- Action Buttons -->
+        <div class="d-grid gap-2 mt-auto">
+            <a href="{% url 'shop:product_detail' product.slug %}" class="btn btn-outline-primary" style="border-radius: 10px;">
+                <i class="fas fa-eye me-2"></i>View Details
+            </a>
             {% if product.stock > 0 %}
-            <form method="post" action="{% url 'shop:cart_add' product.id %}" class="d-inline">
+            <form method="post" action="{% url 'shop:cart_add' product.id %}" class="d-inline add-to-cart-form">
                 {% csrf_token %}
                 <input type="hidden" name="quantity" value="1">
-                <button type="submit" class="btn btn-primary w-100">Add to Cart</button>
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button type="submit" class="btn btn-primary w-100" style="border-radius: 10px; transition: all 0.3s ease;">
+                    <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                </button>
             </form>
             {% else %}
-            <button class="btn btn-secondary w-100" disabled>Out of Stock</button>
+            <button class="btn btn-secondary w-100" disabled style="border-radius: 10px;">
+                <i class="fas fa-times me-2"></i>Out of Stock
+            </button>
             {% endif %}
         </div>
     </div>
-</div> 
+</div>
+
+<style>
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15) !important;
+}
+
+.product-card:hover img {
+    transform: scale(1.05);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.add-to-cart-form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Loading state for add to cart button */
+.add-to-cart-form.loading button {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.add-to-cart-form.loading button::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Rating styles */
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.rating .stars {
+    display: flex;
+    gap: 0.1rem;
+}
+
+.rating .stars i {
+    font-size: 0.85rem;
+    color: #ffc107;
+    transition: color 0.2s ease;
+}
+
+.rating .stars .far.fa-star {
+    color: #dee2e6;
+}
+
+.rating .stars .fas.fa-star-half-alt {
+    color: #ffc107;
+}
+
+.rating .count {
+    font-size: 0.75rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* Show rating only if it exists */
+.rating:empty {
+    display: none;
+}
+
+/* Hide rating section if no reviews */
+.rating:has(.count:empty) {
+    display: none;
+}
+
+.rating .text-muted.small {
+    font-size: 0.75rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add to cart form handling
+    const addToCartForms = document.querySelectorAll('.add-to-cart-form');
+    
+    addToCartForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const button = this.querySelector('button[type="submit"]');
+            const originalText = button.innerHTML;
+            
+            // Add loading state
+            this.classList.add('loading');
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Adding...';
+            button.disabled = true;
+            
+            // Show a temporary success message
+            setTimeout(() => {
+                // Create a toast notification
+                showToast('Product added to cart successfully!', 'success');
+                
+                // Update cart count in navigation
+                updateCartCount();
+                
+                // Reset button after a short delay
+                setTimeout(() => {
+                    this.classList.remove('loading');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }, 1000);
+            }, 500);
+        });
+    });
+});
+
+// Toast notification function
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast-notification toast-${type}`;
+    toast.innerHTML = `
+        <div class="toast-content">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+            ${message}
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Show toast
+    setTimeout(() => toast.classList.add('show'), 100);
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Update cart count function
+function updateCartCount() {
+    const cartBadge = document.querySelector('.navbar-nav .nav-link[href*="cart"] .badge');
+    if (cartBadge) {
+        const currentCount = parseInt(cartBadge.textContent) || 0;
+        const newCount = currentCount + 1;
+        
+        if (newCount > 0) {
+            cartBadge.textContent = newCount;
+            cartBadge.style.animation = 'pulse 0.5s ease-in-out';
+            cartBadge.style.display = 'inline-block';
+        } else {
+            // Hide badge if count is 0
+            cartBadge.style.display = 'none';
+        }
+    }
+}
+
+// Function to handle cart count when items are removed
+function updateCartCountOnRemove() {
+    const cartBadge = document.querySelector('.navbar-nav .nav-link[href*="cart"] .badge');
+    if (cartBadge) {
+        const currentCount = parseInt(cartBadge.textContent) || 0;
+        const newCount = Math.max(0, currentCount - 1);
+        
+        if (newCount > 0) {
+            cartBadge.textContent = newCount;
+        } else {
+            // Hide badge if count is 0
+            cartBadge.style.display = 'none';
+        }
+    }
+}
+
+// Add CSS for toast notifications
+const toastStyles = document.createElement('style');
+toastStyles.textContent = `
+    .toast-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: white;
+        border-radius: 10px;
+        padding: 1rem 1.5rem;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        z-index: 9999;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        border-left: 4px solid #28a745;
+        max-width: 300px;
+    }
+    
+    .toast-notification.show {
+        transform: translateX(0);
+    }
+    
+    .toast-notification.toast-success {
+        border-left-color: #28a745;
+    }
+    
+    .toast-notification.toast-info {
+        border-left-color: #17a2b8;
+    }
+    
+    .toast-content {
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+    }
+    
+    .toast-success .toast-content i {
+        color: #28a745;
+    }
+    
+    .toast-info .toast-content i {
+        color: #17a2b8;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    
+    @media (max-width: 768px) {
+        .toast-notification {
+            top: 10px;
+            right: 10px;
+            left: 10px;
+            max-width: none;
+        }
+    }
+`;
+document.head.appendChild(toastStyles);
+</script> 

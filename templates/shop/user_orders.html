@@ -12,13 +12,13 @@
     <div class="row">
         {% for order in orders %}
         <div class="col-12 mb-4">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div>
+            <div class="card shadow-sm">
+                <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                    <div class="mb-2 mb-md-0">
                         <h5 class="mb-0">Order #{{ order.id }}</h5>
                         <small class="text-muted">Placed on {{ order.created_at|date:"F j, Y" }}</small>
                     </div>
-                    <span class="badge {% if order.status == 'delivered' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% else %}bg-primary{% endif %}">
+                    <span class="badge {% if order.status == 'delivered' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% else %}bg-primary{% endif %} fs-6">
                         {{ order.get_status_display }}
                     </span>
                 </div>
@@ -26,30 +26,30 @@
                     <!-- Order Items -->
                     <div class="row mb-3">
                         {% for item in order.items.all %}
-                        <div class="col-md-6 mb-2">
-                            <div class="d-flex">
+                        <div class="col-12 col-md-6 mb-3">
+                            <div class="d-flex flex-column flex-sm-row">
                                 {% if item.product.get_primary_image %}
-                                <img src="{{ item.product.get_primary_image.url }}" class="img-thumbnail me-3" style="width: 80px; height: 80px; object-fit: cover;" alt="{{ item.product.name }}">
+                                <img src="{{ item.product.get_primary_image.url }}" class="img-thumbnail me-0 me-sm-3 mb-2 mb-sm-0" style="width: 80px; height: 80px; object-fit: cover;" alt="{{ item.product.name }}">
                                 {% else %}
-                                <img src="https://via.placeholder.com/80" class="img-thumbnail me-3" alt="{{ item.product.name }}">
+                                <img src="https://via.placeholder.com/80" class="img-thumbnail me-0 me-sm-3 mb-2 mb-sm-0" alt="{{ item.product.name }}">
                                 {% endif %}
-                                <div>
+                                <div class="flex-grow-1">
                                     <h6 class="mb-1">
                                         <a href="{% url 'shop:product_detail' item.product.slug %}" class="text-decoration-none">{{ item.product.name }}</a>
                                     </h6>
-                                    <p class="text-muted mb-0">Quantity: {{ item.quantity }}</p>
-                                    <p class="mb-0">₹{{ item.price|indian_currency }} each</p>
+                                    <p class="text-muted mb-1">Quantity: {{ item.quantity }}</p>
+                                    <p class="mb-2">₹{{ item.price|indian_currency }} each</p>
                                     {% if order.status == 'delivered' %}
                                         {% with user_review=item.product.reviews.all|filter_reviews|first %}
                                             {% if user_review %}
-                                                <p class="text-success mb-0 mt-1 small">
+                                                <p class="text-success mb-0 small">
                                                     <i class="fas fa-check-circle"></i> Reviewed
                                                     {% if not user_review.is_approved %}
                                                         (pending approval)
                                                     {% endif %}
                                                 </p>
                                             {% else %}
-                                                <a href="{% url 'shop:product_detail' item.product.slug %}#reviewForm" class="btn btn-sm btn-outline-primary mt-1">
+                                                <a href="{% url 'shop:product_detail' item.product.slug %}#reviewForm" class="btn btn-sm btn-outline-primary">
                                                     <i class="fas fa-star"></i> Write a Review
                                                 </a>
                                             {% endif %}
@@ -63,11 +63,11 @@
 
                     <!-- Order Summary -->
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-6 mb-3 mb-md-0">
                             <h6>Shipping Address</h6>
-                            <p class="mb-0">{{ order.address }}</p>
+                            <p class="mb-0 small">{{ order.address }}</p>
                         </div>
-                        <div class="col-md-6 text-md-end">
+                        <div class="col-12 col-md-6 text-start text-md-end">
                             <h6>Order Summary</h6>
                             <p class="mb-1">Subtotal: ₹{{ subtotals|dict_get:order.id|indian_currency }}</p>
                             <p class="mb-1">Shipping: {% if order.total_amount >= 999 %}Free{% else %}₹100.00{% endif %}</p>
@@ -76,13 +76,13 @@
                     </div>
 
                     <!-- Order Actions -->
-                    <div class="mt-3 text-end">
+                    <div class="mt-3 d-flex flex-column flex-sm-row gap-2 justify-content-end">
                         <a href="{% url 'shop:order_detail' order.id %}" class="btn btn-outline-primary">
-                            View Details
+                            <i class="fas fa-eye me-1"></i>View Details
                         </a>
                         {% if order.status == 'pending' %}
                         <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelOrderModal{{ order.id }}">
-                            Cancel Order
+                            <i class="fas fa-times me-1"></i>Cancel Order
                         </button>
                         {% endif %}
                     </div>
@@ -93,7 +93,7 @@
         <!-- Cancel Order Modal -->
         {% if order.status == 'pending' %}
         <div class="modal fade" id="cancelOrderModal{{ order.id }}" tabindex="-1" aria-labelledby="cancelOrderModalLabel{{ order.id }}" aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="cancelOrderModalLabel{{ order.id }}">Cancel Order #{{ order.id }}</h5>
@@ -121,9 +121,102 @@
         <h3>No Orders Yet</h3>
         <p class="text-muted">Start shopping to see your orders here!</p>
         <a href="{% url 'shop:product_list' %}" class="btn btn-primary btn-lg mt-3">
-            Browse Products
+            <i class="fas fa-shopping-cart me-2"></i>Browse Products
         </a>
     </div>
     {% endif %}
 </div>
+
+<style>
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    .py-4 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .card-header {
+        padding: 1rem !important;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .btn {
+        min-height: 44px; /* iOS touch target minimum */
+        font-size: 1rem;
+    }
+    
+    .btn-sm {
+        min-height: 38px;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .badge {
+        font-size: 0.75rem !important;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    h1 {
+        font-size: 1.75rem !important;
+    }
+    
+    h5 {
+        font-size: 1.1rem !important;
+    }
+    
+    h6 {
+        font-size: 1rem !important;
+    }
+    
+    .small {
+        font-size: 0.875rem;
+    }
+    
+    .img-thumbnail {
+        border-radius: 8px;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: 0 0.5rem;
+    }
+    
+    .py-4 {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+    
+    .card-header {
+        padding: 0.75rem !important;
+    }
+    
+    .card-body {
+        padding: 0.75rem !important;
+    }
+    
+    h1 {
+        font-size: 1.5rem !important;
+    }
+    
+    .btn-lg {
+        padding: 0.875rem 1rem !important;
+        font-size: 1rem;
+    }
+    
+    .fa-4x {
+        font-size: 3em !important;
+    }
+    
+    .d-flex.flex-column.flex-sm-row {
+        gap: 0.5rem;
+    }
+}
+</style>
 {% endblock %} 

@@ -196,15 +196,31 @@
             <!-- Add to Cart Form -->
             <div class="mb-4">
                 {% if product.stock > 0 %}
-                <form method="post" action="{% url 'shop:cart_add' product.id %}" class="d-inline">
+                <form method="post" action="{% url 'shop:cart_add' product.id %}" class="d-inline add-to-cart-form">
                     {% csrf_token %}
-                    <div class="input-group mb-3" style="max-width: 200px;">
-                        <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control">
-                        <button type="submit" class="btn btn-primary">Add to Cart</button>
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <div class="input-group mb-3" style="max-width: 250px;">
+                        <button type="button" class="btn btn-outline-secondary" onclick="decrementQuantity()">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ product.stock }}" 
+                               class="form-control text-center" style="border-left: 0; border-right: 0;">
+                        <button type="button" class="btn btn-outline-secondary" onclick="incrementQuantity()">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" style="border-radius: 12px; padding: 12px;">
+                            <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                        </button>
                     </div>
                 </form>
                 {% else %}
-                <button class="btn btn-secondary" disabled>Out of Stock</button>
+                <div class="d-grid">
+                    <button class="btn btn-secondary btn-lg" disabled style="border-radius: 12px; padding: 12px;">
+                        <i class="fas fa-times me-2"></i>Out of Stock
+                    </button>
+                </div>
                 {% endif %}
             </div>
 
@@ -311,6 +327,9 @@
         var value = parseInt(input.value);
         if (value < max) {
             input.value = value + 1;
+        } else {
+            // Show feedback when max is reached
+            showToast('Maximum available quantity reached', 'info');
         }
     }
 
@@ -319,6 +338,9 @@
         var value = parseInt(input.value);
         if (value > 1) {
             input.value = value - 1;
+        } else {
+            // Show feedback when minimum is reached
+            showToast('Minimum quantity is 1', 'info');
         }
     }
 
@@ -390,7 +412,129 @@
                 submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...';
             });
         }
+        
+        // Add to cart form handling
+        const addToCartForm = document.querySelector('.add-to-cart-form');
+        if (addToCartForm) {
+            addToCartForm.addEventListener('submit', function(e) {
+                const button = this.querySelector('button[type="submit"]');
+                const originalText = button.innerHTML;
+                
+                // Add loading state
+                button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Adding to Cart...';
+                button.disabled = true;
+                
+                // Show a temporary success message
+                setTimeout(() => {
+                    // Create a toast notification
+                    showToast('Product added to cart successfully!', 'success');
+                    
+                    // Update cart count in navigation
+                    updateCartCount();
+                    
+                    // Reset button after a short delay
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 1000);
+                }, 500);
+            });
+        }
     });
+    
+    // Toast notification function
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast-notification toast-${type}`;
+        toast.innerHTML = `
+            <div class="toast-content">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+                ${message}
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Show toast
+        setTimeout(() => toast.classList.add('show'), 100);
+        
+        // Remove toast after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+    
+    // Update cart count function
+    function updateCartCount() {
+        const cartBadge = document.querySelector('.navbar-nav .nav-link[href*="cart"] .badge');
+        if (cartBadge) {
+            const currentCount = parseInt(cartBadge.textContent) || 0;
+            cartBadge.textContent = currentCount + 1;
+            cartBadge.style.animation = 'pulse 0.5s ease-in-out';
+        }
+    }
+    
+    // Add CSS for toast notifications
+    const toastStyles = document.createElement('style');
+    toastStyles.textContent = `
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            z-index: 9999;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            border-left: 4px solid #28a745;
+            max-width: 300px;
+        }
+        
+        .toast-notification.show {
+            transform: translateX(0);
+        }
+        
+        .toast-notification.toast-success {
+            border-left-color: #28a745;
+        }
+        
+        .toast-notification.toast-info {
+            border-left-color: #17a2b8;
+        }
+        
+        .toast-content {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+        
+        .toast-success .toast-content i {
+            color: #28a745;
+        }
+        
+        .toast-info .toast-content i {
+            color: #17a2b8;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        @media (max-width: 768px) {
+            .toast-notification {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+    `;
+    document.head.appendChild(toastStyles);
 </script>
 {% endblock %}
 {% endblock %} 

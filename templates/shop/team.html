@@ -13,26 +13,254 @@
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for member in team_members %}
         <div class="col">
-            <div class="card h-100 border-0 shadow-sm">
+            <div class="card h-100 border-0 shadow-sm team-card">
                 <div class="card-img-top position-relative" style="height: 300px; overflow: hidden;">
                     {% if member.image %}
-                    <img src="{{ member.image.url }}" alt="{{ member.name }}" class="w-100 h-100 object-fit-cover">
+                    <img src="{{ member.image.url }}" alt="{{ member.name }}" class="w-100 h-100 object-fit-cover team-image">
                     {% else %}
-                    <img src="{% static 'images/default-team.jpg' %}" alt="{{ member.name }}" class="w-100 h-100 object-fit-cover">
+                    <img src="{% static 'images/default-team.jpg' %}" alt="{{ member.name }}" class="w-100 h-100 object-fit-cover team-image">
                     {% endif %}
+                    <div class="team-overlay">
+                        <div class="team-social">
+                            <i class="fas fa-user-circle fa-2x text-white"></i>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body text-center">
                     <h3 class="card-title h5 mb-1">{{ member.name }}</h3>
-                    <p class="text-muted mb-3">{{ member.position }}</p>
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-briefcase me-1"></i>{{ member.position }}
+                    </p>
                     <p class="card-text">{{ member.bio }}</p>
                 </div>
             </div>
         </div>
         {% empty %}
         <div class="col-12 text-center">
-            <p class="lead">Our team information is coming soon!</p>
+            <div class="empty-state">
+                <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                <h3>Our Team Information</h3>
+                <p class="lead text-muted">Our team information is coming soon!</p>
+                <a href="{% url 'shop:home' %}" class="btn btn-primary btn-lg mt-3">
+                    <i class="fas fa-home me-2"></i>Back to Home
+                </a>
+            </div>
         </div>
         {% endfor %}
     </div>
 </div>
+
+<style>
+/* Team card styling */
+.team-card {
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.team-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+}
+
+.team-image {
+    transition: transform 0.3s ease;
+}
+
+.team-card:hover .team-image {
+    transform: scale(1.05);
+}
+
+.team-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.team-card:hover .team-overlay {
+    opacity: 1;
+}
+
+.team-social {
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.team-card:hover .team-social {
+    transform: translateY(0);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title {
+    color: #333;
+    font-weight: 600;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.empty-state {
+    padding: 3rem 1rem;
+}
+
+.empty-state i {
+    opacity: 0.5;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    .py-5 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .display-4 {
+        font-size: 2rem !important;
+    }
+    
+    .lead {
+        font-size: 1rem !important;
+    }
+    
+    .card-img-top {
+        height: 250px !important;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .card-title {
+        font-size: 1.1rem !important;
+    }
+    
+    .card-text {
+        font-size: 0.9rem;
+    }
+    
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+    
+    .empty-state .fa-4x {
+        font-size: 3em !important;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1rem !important;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: 0 0.5rem;
+    }
+    
+    .py-5 {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+    
+    .display-4 {
+        font-size: 1.75rem !important;
+    }
+    
+    .lead {
+        font-size: 0.95rem !important;
+    }
+    
+    .card-img-top {
+        height: 200px !important;
+    }
+    
+    .card-body {
+        padding: 0.75rem !important;
+    }
+    
+    .card-title {
+        font-size: 1rem !important;
+    }
+    
+    .card-text {
+        font-size: 0.85rem;
+    }
+    
+    .empty-state {
+        padding: 1.5rem 0.5rem;
+    }
+    
+    .empty-state .fa-4x {
+        font-size: 2.5em !important;
+    }
+    
+    .btn-lg {
+        padding: 0.875rem 1rem !important;
+        font-size: 0.95rem;
+    }
+    
+    .mb-5 {
+        margin-bottom: 2rem !important;
+    }
+}
+
+/* Animation for cards */
+.team-card {
+    animation: fadeInUp 0.6s ease-out;
+    animation-fill-mode: both;
+}
+
+.team-card:nth-child(1) { animation-delay: 0.1s; }
+.team-card:nth-child(2) { animation-delay: 0.2s; }
+.team-card:nth-child(3) { animation-delay: 0.3s; }
+.team-card:nth-child(4) { animation-delay: 0.4s; }
+.team-card:nth-child(5) { animation-delay: 0.5s; }
+.team-card:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    .team-card:hover {
+        transform: none;
+    }
+    
+    .team-card:hover .team-image {
+        transform: none;
+    }
+    
+    .team-card:hover .team-overlay {
+        opacity: 0;
+    }
+    
+    .team-card:active {
+        transform: scale(0.98);
+    }
+}
+</style>
 {% endblock %} 

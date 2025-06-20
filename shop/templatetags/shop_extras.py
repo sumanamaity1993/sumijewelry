@@ -37,6 +37,14 @@ def subtract(value, arg):
         return value
 
 @register.filter
+def add(value, arg):
+    """Add the arg to the value."""
+    try:
+        return float(value) + float(arg)
+    except (ValueError, TypeError):
+        return value
+
+@register.filter
 def avg_rating(reviews):
     """Calculate average rating from reviews."""
     if not reviews:

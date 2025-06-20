@@ -17,13 +17,19 @@ from django.db import models
 
 def home(request):
     """Home page view showing featured products and categories."""
-    featured_products = Product.objects.filter(is_featured=True, available=True)[:8]
+    featured_products = Product.objects.filter(is_featured=True, available=True).annotate(
+        avg_rating=models.Avg('reviews__rating', filter=models.Q(reviews__is_approved=True)),
+        review_count=models.Count('reviews', filter=models.Q(reviews__is_approved=True))
+    )[:8]
     
     # New Arrivals - Products created in the last 7 days
     seven_days_ago = timezone.now() - timedelta(days=7)
     new_arrivals = Product.objects.filter(
         available=True, 
         created_at__gte=seven_days_ago
+    ).annotate(
+        avg_rating=models.Avg('reviews__rating', filter=models.Q(reviews__is_approved=True)),
+        review_count=models.Count('reviews', filter=models.Q(reviews__is_approved=True))
     ).order_by('-created_at')[:4]
     
     # Trending Products - Based on sophisticated analytics (views, reviews, recent orders)
@@ -36,7 +42,9 @@ def home(request):
                           orderitem__order__created_at__gte=timezone.now() - timedelta(days=30),
                           orderitem__order__status__in=['delivered', 'shipped']
                       )) * 0.3 +
-                      models.Avg('reviews__rating', filter=models.Q(reviews__is_approved=True)) * 0.2
+                      models.Avg('reviews__rating', filter=models.Q(reviews__is_approved=True)) * 0.2,
+        avg_rating=models.Avg('reviews__rating', filter=models.Q(reviews__is_approved=True)),
+        review_count=models.Count('reviews', filter=models.Q(reviews__is_approved=True))
     ).filter(
         trending_score__gt=0  # Only show products with some trending activity
     ).order_by('-trending_score')[:4]  # Show top 4 trending products on home page
@@ -127,6 +135,12 @@ def product_list(request, category_slug=None):
         print("Default sorting by newest")
     
     print(f"Final query: {products.query}")  # Debug print
+    
+    # Calculate ratings for product cards
+    products = products.annotate(
+        avg_rating=models.Avg('reviews__rating', filter=models.Q(reviews__is_approved=True)),
+        review_count=models.Count('reviews', filter=models.Q(reviews__is_approved=True))
+    )
     
     # Pagination
     paginator = Paginator(products, 12)  # Show 12 products per page
@@ -228,8 +242,40 @@ def cart_add(request, product_id):
         cart_item.quantity += 1
         cart_item.save()
     
-    messages.success(request, f'{product.name} added to cart.')
-    return redirect('shop:cart_detail')
+    # Get the next URL from the request, or default to cart
+    next_url = request.GET.get('next', 'shop:cart_detail')
+    
+    # If next_url is a relative URL, convert it to a proper URL name
+    if next_url.startswith('/'):
+        # Convert path to URL name (simplified logic)
+        if next_url == '/':
+            next_url = 'shop:home'
+        elif next_url.startswith('/products/'):
+            next_url = 'shop:product_list'
+        else:
+            next_url = 'shop:cart_detail'
+    
+    messages.success(request, f'✅ {product.name} added to cart successfully!')
+    
+    # If it's an AJAX request, return JSON response
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': f'{product.name} added to cart successfully!',
+            'cart_count': cart.get_total_items(),
+            'cart_total': str(cart.get_total_cost())
+        })
+    
+    # Redirect based on the next parameter
+    if next_url == 'shop:cart_detail':
+        return redirect('shop:cart_detail')
+    elif next_url == 'shop:home':
+        return redirect('shop:home')
+    elif next_url == 'shop:product_list':
+        return redirect('shop:product_list')
+    else:
+        # Default to the product detail page
+        return redirect('shop:product_detail', slug=product.slug)
 
 @login_required
 def cart_remove(request, product_id):
@@ -237,9 +283,17 @@ def cart_remove(request, product_id):
     cart = get_object_or_404(Cart, user=request.user)
     product = get_object_or_404(Product, id=product_id)
     cart_item = get_object_or_404(CartItem, cart=cart, product=product)
+    
+    # Check if this is the last item in cart
+    is_last_item = cart.items.count() == 1
+    
     cart_item.delete()
     
-    messages.success(request, f'{product.name} removed from cart.')
+    if is_last_item:
+        messages.success(request, f'{product.name} removed from cart. Your cart is now empty.')
+    else:
+        messages.success(request, f'{product.name} removed from cart.')
+    
     return redirect('shop:cart_detail')
 
 @login_required
@@ -250,13 +304,20 @@ def cart_update(request, product_id):
     cart_item = get_object_or_404(CartItem, cart=cart, product=product)
     
     quantity = int(request.POST.get('quantity', 1))
+    
+    # Check if this is the last item in cart
+    is_last_item = cart.items.count() == 1
+    
     if quantity > 0:
         cart_item.quantity = quantity
         cart_item.save()
         messages.success(request, f'Cart updated.')
     else:
         cart_item.delete()
-        messages.success(request, f'{product.name} removed from cart.')
+        if is_last_item:
+            messages.success(request, f'{product.name} removed from cart. Your cart is now empty.')
+        else:
+            messages.success(request, f'{product.name} removed from cart.')
     
     return redirect('shop:cart_detail')
 
@@ -375,6 +436,12 @@ def search(request):
     else:  # newest
         products = products.order_by('-created_at')
     
+    # Calculate ratings for product cards
+    products = products.annotate(
+        avg_rating=models.Avg('reviews__rating', filter=models.Q(reviews__is_approved=True)),
+        review_count=models.Count('reviews', filter=models.Q(reviews__is_approved=True))
+    )
+    
     # Get unique materials for filter options
     materials = Product.objects.values_list('material', flat=True).distinct()
     
@@ -476,7 +543,9 @@ def trending_products(request):
                           orderitem__order__created_at__gte=timezone.now() - timedelta(days=30),
                           orderitem__order__status__in=['delivered', 'shipped']
                       )) * 0.3 +
-                      models.Avg('reviews__rating', filter=models.Q(reviews__is_approved=True)) * 0.2
+                      models.Avg('reviews__rating', filter=models.Q(reviews__is_approved=True)) * 0.2,
+        avg_rating=models.Avg('reviews__rating', filter=models.Q(reviews__is_approved=True)),
+        review_count=models.Count('reviews', filter=models.Q(reviews__is_approved=True))
     ).filter(
         trending_score__gt=0  # Only show products with some trending activity
     ).order_by('-trending_score')[:10]  # Show top 10 trending products

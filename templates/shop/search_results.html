@@ -13,56 +13,87 @@
         {% endif %}
     </div>
 
+    <!-- Mobile Filter Toggle Button -->
+    <div class="d-md-none mb-3">
+        <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSearchFilters" aria-expanded="false" aria-controls="mobileSearchFilters">
+            <i class="fas fa-filter me-2"></i>Show Filters & Refine Search
+        </button>
+    </div>
+
     <!-- Search Results -->
     <div class="row">
         <!-- Filters Sidebar -->
         <div class="col-md-3">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Refine Search</h5>
-                </div>
-                <div class="card-body">
-                    <form method="get" action="{% url 'shop:search' %}">
-                        <input type="hidden" name="q" value="{{ query }}">
-                        
-                        <!-- Material Filter -->
-                        <div class="mb-3">
-                            <label class="form-label">Material</label>
-                            <select name="material" class="form-select">
-                                <option value="">All Materials</option>
-                                <option value="Gold" {% if request.GET.material == 'Gold' %}selected{% endif %}>Gold</option>
-                                <option value="Silver" {% if request.GET.material == 'Silver' %}selected{% endif %}>Silver</option>
-                                <option value="Platinum" {% if request.GET.material == 'Platinum' %}selected{% endif %}>Platinum</option>
-                            </select>
-                        </div>
-
-                        <!-- Price Range Filter -->
-                        <div class="mb-3">
-                            <label class="form-label">Price Range</label>
-                            <div class="input-group mb-2">
-                                <input type="number" name="min_price" class="form-control" placeholder="Min" value="{{ request.GET.min_price }}">
-                                <input type="number" name="max_price" class="form-control" placeholder="Max" value="{{ request.GET.max_price }}">
+            <!-- Mobile Collapsible Filters -->
+            <div class="collapse d-md-block" id="mobileSearchFilters">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-filter me-2"></i>Refine Search
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" action="{% url 'shop:search' %}">
+                            <input type="hidden" name="q" value="{{ query }}">
+                            
+                            <!-- Material Filter -->
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-gem me-1"></i>Material
+                                </label>
+                                <select name="material" class="form-select">
+                                    <option value="">All Materials</option>
+                                    <option value="Gold" {% if request.GET.material == 'Gold' %}selected{% endif %}>Gold</option>
+                                    <option value="Silver" {% if request.GET.material == 'Silver' %}selected{% endif %}>Silver</option>
+                                    <option value="Platinum" {% if request.GET.material == 'Platinum' %}selected{% endif %}>Platinum</option>
+                                </select>
                             </div>
-                        </div>
 
-                        <!-- Sort Filter -->
-                        <div class="mb-3">
-                            <label class="form-label">Sort By</label>
-                            <select name="sort" class="form-select">
-                                <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest</option>
-                                <option value="price_low" {% if request.GET.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
-                                <option value="price_high" {% if request.GET.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
-                            </select>
-                        </div>
+                            <!-- Price Range Filter -->
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-rupee-sign me-1"></i>Price Range
+                                </label>
+                                <div class="input-group mb-2">
+                                    <input type="number" name="min_price" class="form-control" placeholder="Min" value="{{ request.GET.min_price }}">
+                                    <input type="number" name="max_price" class="form-control" placeholder="Max" value="{{ request.GET.max_price }}">
+                                </div>
+                            </div>
 
-                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
-                    </form>
+                            <!-- Sort Filter -->
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-sort me-1"></i>Sort By
+                                </label>
+                                <select name="sort" class="form-select">
+                                    <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest</option>
+                                    <option value="price_low" {% if request.GET.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                                    <option value="price_high" {% if request.GET.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-2"></i>Apply Filters
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Products Grid -->
         <div class="col-md-9">
+            <!-- Results Summary -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <p class="mb-0 text-muted">
+                    <i class="fas fa-search me-1"></i>
+                    Found {{ products|length }} product{{ products|length|pluralize }}
+                </p>
+                <a href="{% url 'shop:product_list' %}" class="btn btn-outline-secondary btn-sm d-none d-md-inline">
+                    <i class="fas fa-list me-1"></i>View All Products
+                </a>
+            </div>
+
             <div class="row g-4">
                 {% for product in products %}
                 <div class="col-md-4">
@@ -70,10 +101,18 @@
                 </div>
                 {% empty %}
                 <div class="col-12">
-                    <div class="alert alert-info">
-                        No products found matching your search criteria.
-                        <br>
-                        <a href="{% url 'shop:product_list' %}" class="alert-link">Browse all products</a>
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                        <h3>No Products Found</h3>
+                        <p class="text-muted mb-4">No products found matching your search criteria.</p>
+                        <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                            <a href="{% url 'shop:product_list' %}" class="btn btn-primary">
+                                <i class="fas fa-list me-2"></i>Browse All Products
+                            </a>
+                            <button class="btn btn-outline-secondary" onclick="clearSearch()">
+                                <i class="fas fa-times me-2"></i>Clear Search
+                            </button>
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
@@ -81,4 +120,186 @@
         </div>
     </div>
 </div>
+
+<style>
+/* Search results styling */
+.card {
+    border-radius: 15px;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    .py-4 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .btn {
+        min-height: 44px; /* iOS touch target minimum */
+        font-size: 1rem;
+    }
+    
+    .btn-sm {
+        min-height: 38px;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    h1 {
+        font-size: 1.75rem !important;
+    }
+    
+    .lead {
+        font-size: 1rem !important;
+    }
+    
+    .form-control {
+        min-height: 44px; /* iOS touch target minimum */
+        font-size: 1rem;
+    }
+    
+    .form-select {
+        min-height: 44px; /* iOS touch target minimum */
+        font-size: 1rem;
+    }
+    
+    .input-group .form-control {
+        min-height: 44px;
+    }
+    
+    .fa-4x {
+        font-size: 3em !important;
+    }
+    
+    .d-flex.flex-column.flex-sm-row {
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: 0 0.5rem;
+    }
+    
+    .py-4 {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+    
+    .card-body {
+        padding: 0.75rem !important;
+    }
+    
+    h1 {
+        font-size: 1.5rem !important;
+    }
+    
+    .lead {
+        font-size: 0.95rem !important;
+    }
+    
+    .btn {
+        padding: 0.875rem 1rem !important;
+    }
+    
+    .fa-4x {
+        font-size: 2.5em !important;
+    }
+    
+    .text-center.py-5 {
+        padding: 2rem 0 !important;
+    }
+    
+    .mb-4 {
+        margin-bottom: 1.5rem !important;
+    }
+}
+
+/* Animation for search results */
+.row.g-4 > div {
+    animation: fadeInUp 0.6s ease-out;
+    animation-fill-mode: both;
+}
+
+.row.g-4 > div:nth-child(1) { animation-delay: 0.1s; }
+.row.g-4 > div:nth-child(2) { animation-delay: 0.2s; }
+.row.g-4 > div:nth-child(3) { animation-delay: 0.3s; }
+.row.g-4 > div:nth-child(4) { animation-delay: 0.4s; }
+.row.g-4 > div:nth-child(5) { animation-delay: 0.5s; }
+.row.g-4 > div:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update button text when filters are toggled
+    const filterButton = document.querySelector('[data-bs-toggle="collapse"]');
+    const filterCollapse = document.getElementById('mobileSearchFilters');
+    
+    if (filterButton && filterCollapse) {
+        filterCollapse.addEventListener('show.bs.collapse', function() {
+            filterButton.innerHTML = '<i class="fas fa-filter me-2"></i>Hide Filters & Refine Search';
+        });
+        
+        filterCollapse.addEventListener('hide.bs.collapse', function() {
+            filterButton.innerHTML = '<i class="fas fa-filter me-2"></i>Show Filters & Refine Search';
+        });
+    }
+});
+
+function clearSearch() {
+    // Clear the search query and redirect to product list
+    window.location.href = "{% url 'shop:product_list' %}";
+}
+</script>
 {% endblock %} 

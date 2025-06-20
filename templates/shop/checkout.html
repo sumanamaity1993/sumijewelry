@@ -1,79 +1,131 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 {% load shop_extras %}
+{% load static %}
 
 {% block title %}Checkout - Sumi Jewelry Store{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <h1 class="mb-4">Checkout</h1>
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-credit-card fa-2x text-primary me-3"></i>
+                <div>
+                    <h1 class="h2 mb-1 fw-bold">Secure Checkout</h1>
+                    <p class="text-muted mb-0">Complete your purchase with confidence</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="row">
         <!-- Checkout Form -->
-        <div class="col-md-8">
-            <div class="card mb-4">
-                <div class="card-body">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4" style="border-radius: 15px;">
+                <div class="card-header bg-white border-0 py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-user me-2 text-primary"></i>
+                        Shipping & Payment Information
+                    </h5>
+                </div>
+                <div class="card-body p-4">
                     <form method="post" id="checkout-form">
                         {% csrf_token %}
                         
                         <!-- Shipping Information -->
-                        <h4 class="mb-3">Shipping Information</h4>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="first_name" class="form-label">First Name</label>
-                                <input type="text" class="form-control" id="first_name" name="first_name" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="last_name" class="form-label">Last Name</label>
-                                <input type="text" class="form-control" id="last_name" name="last_name" required>
-                            </div>
-                            <div class="col-12">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
-                            </div>
-                            <div class="col-12">
-                                <label for="phone" class="form-label">Phone Number</label>
-                                <input type="tel" class="form-control" id="phone" name="phone" required>
-                            </div>
-                            <div class="col-12">
-                                <label for="address" class="form-label">Shipping Address</label>
-                                <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark mb-3">
+                                <i class="fas fa-shipping-fast me-2 text-success"></i>
+                                Shipping Information
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
+                                        <label for="first_name">First Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
+                                        <label for="last_name">Last Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" required>
+                                        <label for="email">Email Address</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="Phone Number" required>
+                                        <label for="phone">Phone Number</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" id="address" name="address" placeholder="Shipping Address" style="height: 100px" required></textarea>
+                                        <label for="address">Shipping Address</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <hr class="my-4">
 
                         <!-- Payment Information -->
-                        <h4 class="mb-3">Payment Information</h4>
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="payment_method" id="credit_card" value="credit_card" checked>
-                                    <label class="form-check-label" for="credit_card">
-                                        Credit Card
-                                    </label>
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark mb-3">
+                                <i class="fas fa-credit-card me-2 text-primary"></i>
+                                Payment Method
+                            </h6>
+                            
+                            <!-- Payment Options -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <div class="payment-option">
+                                        <input class="form-check-input" type="radio" name="payment_method" id="credit_card" value="credit_card" checked>
+                                        <label class="form-check-label payment-option-label" for="credit_card">
+                                            <i class="fas fa-credit-card me-2"></i>
+                                            Credit/Debit Card
+                                        </label>
+                                    </div>
                                 </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="payment_method" id="cod" value="cod">
-                                    <label class="form-check-label" for="cod">
-                                        Cash on Delivery
-                                    </label>
+                                <div class="col-md-6">
+                                    <div class="payment-option">
+                                        <input class="form-check-input" type="radio" name="payment_method" id="cod" value="cod">
+                                        <label class="form-check-label payment-option-label" for="cod">
+                                            <i class="fas fa-money-bill-wave me-2"></i>
+                                            Cash on Delivery
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Credit Card Fields (shown/hidden based on selection) -->
-                            <div id="credit_card_fields">
-                                <div class="col-12">
-                                    <label for="card_number" class="form-label">Card Number</label>
-                                    <input type="text" class="form-control" id="card_number" placeholder="1234 5678 9012 3456">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="expiry" class="form-label">Expiry Date</label>
-                                    <input type="text" class="form-control" id="expiry" placeholder="MM/YY">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="cvv" class="form-label">CVV</label>
-                                    <input type="text" class="form-control" id="cvv" placeholder="123">
+                            <!-- Credit Card Fields -->
+                            <div id="credit_card_fields" class="payment-fields">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="card_number" placeholder="Card Number">
+                                            <label for="card_number">Card Number</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="expiry" placeholder="MM/YY">
+                                            <label for="expiry">Expiry Date</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="cvv" placeholder="CVV">
+                                            <label for="cvv">CVV</label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -81,77 +133,316 @@
                         <hr class="my-4">
 
                         <!-- Terms and Conditions -->
-                        <div class="form-check mb-3">
+                        <div class="form-check mb-4">
                             <input type="checkbox" class="form-check-input" id="terms" required>
                             <label class="form-check-label" for="terms">
-                                I agree to the <a href="#">Terms and Conditions</a> and <a href="#">Privacy Policy</a>
+                                I agree to the <a href="#" class="text-decoration-none">Terms and Conditions</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>
                             </label>
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-lg w-100">
-                            Place Order
-                        </button>
+                        <!-- Place Order Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" style="border-radius: 12px; padding: 12px;">
+                                <i class="fas fa-lock me-2"></i>
+                                Place Order Securely
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
 
         <!-- Order Summary -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Order Summary</h5>
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0" style="border-radius: 15px; position: sticky; top: 20px;">
+                <div class="card-header bg-primary text-white border-0 py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-receipt me-2"></i>
+                        Order Summary
+                    </h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <!-- Cart Items -->
-                    {% for item in cart.items.all %}
-                    <div class="d-flex justify-content-between mb-2">
-                        <div>
-                            <h6 class="mb-0">{{ item.product.name }}</h6>
-                            <small class="text-muted">Qty: {{ item.quantity }}</small>
+                    <div class="mb-4">
+                        {% for item in cart.items.all %}
+                        <div class="d-flex align-items-center mb-3 cart-item-summary">
+                            <div class="flex-shrink-0 me-3">
+                                {% if item.product.get_primary_image %}
+                                <img src="{{ item.product.get_primary_image.url }}" 
+                                     class="rounded" 
+                                     alt="{{ item.product.name }}"
+                                     style="width: 50px; height: 50px; object-fit: cover;">
+                                {% else %}
+                                <img src="https://via.placeholder.com/50x50/f8f9fa/6c757d?text=No+Image" 
+                                     class="rounded" 
+                                     alt="{{ item.product.name }}">
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1 fw-bold">{{ item.product.name }}</h6>
+                                <small class="text-muted">Qty: {{ item.quantity }}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="fw-bold">₹{{ item.get_cost|indian_currency }}</span>
+                            </div>
                         </div>
-                        <span>₹{{ item.get_cost|indian_currency }}</span>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
 
-                    <hr>
+                    <hr class="my-3">
 
                     <!-- Totals -->
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Subtotal</span>
-                        <span>₹{{ cart.get_total_cost|indian_currency }}</span>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Subtotal ({{ cart.get_total_items }} items)</span>
+                            <span class="fw-bold">₹{{ cart.get_total_cost|indian_currency }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">
+                                <i class="fas fa-shipping-fast me-1"></i>
+                                Shipping
+                            </span>
+                            <span class="fw-bold">
+                                {% if cart.get_total_cost >= 999 %}
+                                    <span class="text-success">Free</span>
+                                {% else %}
+                                    ₹100.00
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        {% if cart.get_total_cost < 999 %}
+                        <div class="alert alert-info small mb-3" style="border-radius: 10px;">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Add ₹{{ 999|subtract:cart.get_total_cost|indian_currency }} more for free shipping!
+                        </div>
+                        {% endif %}
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Shipping</span>
-                        <span>{% if cart.get_total_cost >= 999 %}Free{% else %}₹100.00{% endif %}</span>
+                    
+                    <hr class="my-3">
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="fw-bold fs-5">Total</span>
+                        <span class="fw-bold fs-5 text-primary">
+                            ₹{% if cart.get_total_cost >= 999 %}{{ cart.get_total_cost|indian_currency }}{% else %}{{ cart.get_total_cost|add:"0"|add:"100"|indian_currency }}{% endif %}
+                        </span>
                     </div>
-                    <hr>
-                    <div class="d-flex justify-content-between mb-3">
-                        <strong>Total</strong>
-                        <strong>₹{% if cart.get_total_cost >= 999 %}{{ cart.get_total_cost|indian_currency }}{% else %}{{ cart.get_total_cost|add:"0"|add:"100"|indian_currency }}{% endif %}</strong>
+                </div>
+            </div>
+
+            <!-- Security & Trust -->
+            <div class="card mt-3 border-0 shadow-sm" style="border-radius: 15px;">
+                <div class="card-body p-3 text-center">
+                    <div class="row">
+                        <div class="col-4">
+                            <i class="fas fa-shield-alt text-success fa-lg mb-2"></i>
+                            <p class="small mb-0">Secure</p>
+                        </div>
+                        <div class="col-4">
+                            <i class="fas fa-shipping-fast text-primary fa-lg mb-2"></i>
+                            <p class="small mb-0">Fast Delivery</p>
+                        </div>
+                        <div class="col-4">
+                            <i class="fas fa-undo text-info fa-lg mb-2"></i>
+                            <p class="small mb-0">Easy Returns</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Security Notice -->
-            <div class="card mt-4">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="fas fa-lock text-success me-2"></i>
-                        Secure Checkout
-                    </h5>
-                    <p class="card-text text-muted">
-                        Your payment information is encrypted and secure. We never store your credit card details.
-                    </p>
+            <div class="card mt-3 border-0 shadow-sm" style="border-radius: 15px;">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-lock text-success fa-lg me-3 mt-1"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Secure Checkout</h6>
+                            <p class="small text-muted mb-0">
+                                Your payment information is encrypted and secure. We never store your credit card details.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+/* Payment Option Styling */
+.payment-option {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.payment-option:hover {
+    border-color: #667eea;
+    background-color: #f8f9ff;
+}
+
+.payment-option input[type="radio"]:checked + .payment-option-label {
+    color: #667eea;
+    font-weight: 600;
+}
+
+.payment-option input[type="radio"]:checked ~ .payment-option {
+    border-color: #667eea;
+    background-color: #f8f9ff;
+}
+
+.payment-option input[type="radio"] {
+    display: none;
+}
+
+.payment-option-label {
+    cursor: pointer;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+/* Payment Fields */
+.payment-fields {
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+/* Form Styling */
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: #667eea;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+/* Cart Item Summary */
+.cart-item-summary {
+    transition: all 0.3s ease;
+}
+
+.cart-item-summary:hover {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 0.5rem;
+    margin: -0.5rem;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    .py-5 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1rem !important;
+        font-size: 1rem;
+    }
+    
+    .form-floating > .form-control {
+        height: 3.5rem;
+        font-size: 1rem;
+    }
+    
+    .form-floating > label {
+        padding: 1rem 0.75rem;
+        font-size: 1rem;
+    }
+    
+    .h2 {
+        font-size: 1.5rem !important;
+    }
+    
+    .position-sticky {
+        position: static !important;
+        top: auto !important;
+    }
+    
+    .payment-option {
+        margin-bottom: 1rem;
+    }
+    
+    .payment-fields {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .btn-lg {
+        padding: 0.875rem 1rem !important;
+    }
+    
+    .form-floating > .form-control {
+        height: 3.25rem;
+    }
+    
+    .form-floating > label {
+        padding: 0.875rem 0.75rem;
+    }
+    
+    .h2 {
+        font-size: 1.25rem !important;
+    }
+    
+    .payment-option {
+        padding: 0.75rem;
+    }
+    
+    .payment-fields {
+        padding: 0.75rem;
+    }
+    
+    .cart-item-summary img {
+        width: 40px !important;
+        height: 40px !important;
+    }
+}
+</style>
+
 {% block extra_js %}
 <script>
-// Basic form validation
+// Enhanced form validation
 document.getElementById('checkout-form').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -161,27 +452,35 @@ document.getElementById('checkout-form').addEventListener('submit', function(e) 
         // Validate card number (simple check)
         const cardNumber = document.getElementById('card_number').value.replace(/\s/g, '');
         if (!/^\d{16}$/.test(cardNumber)) {
-            alert('Please enter a valid 16-digit card number');
+            showAlert('Please enter a valid 16-digit card number', 'error');
             return;
         }
         
         // Validate expiry date
         const expiry = document.getElementById('expiry').value;
         if (!/^\d{2}\/\d{2}$/.test(expiry)) {
-            alert('Please enter a valid expiry date (MM/YY)');
+            showAlert('Please enter a valid expiry date (MM/YY)', 'error');
             return;
         }
         
         // Validate CVV
         const cvv = document.getElementById('cvv').value;
         if (!/^\d{3,4}$/.test(cvv)) {
-            alert('Please enter a valid CVV');
+            showAlert('Please enter a valid CVV', 'error');
             return;
         }
     }
     
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    submitBtn.disabled = true;
+    
     // If all validations pass, submit the form
-    this.submit();
+    setTimeout(() => {
+        this.submit();
+    }, 1000);
 });
 
 // Show/hide credit card fields based on payment method
@@ -214,6 +513,42 @@ document.getElementById('expiry').addEventListener('input', function(e) {
         value = value.slice(0, 2) + '/' + value.slice(2, 4);
     }
     e.target.value = value;
+});
+
+// Format CVV input
+document.getElementById('cvv').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 4) value = value.slice(0, 4);
+    e.target.value = value;
+});
+
+// Format phone number input
+document.getElementById('phone').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 10) value = value.slice(0, 10);
+    e.target.value = value;
+});
+
+// Simple alert function
+function showAlert(message, type = 'info') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'error' ? 'danger' : 'info'} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+
+// Auto-fill form with user data if available
+document.addEventListener('DOMContentLoaded', function() {
+    // You can add auto-fill logic here if user data is available
+    console.log('Checkout form loaded successfully');
 });
 </script>
 {% endblock %}

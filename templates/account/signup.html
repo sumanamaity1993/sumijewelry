@@ -2,53 +2,281 @@
 {% load i18n %}
 {% load account socialaccount %}
 {% load crispy_forms_tags %}
+{% load static %}
 
 {% block title %}Sign Up - Sumi Jewelry Store{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h1 class="text-center mb-4">{% trans "Sign Up" %}</h1>
-
-                    {% get_providers as socialaccount_providers %}
-
-                    {% if socialaccount_providers %}
-                    <div class="socialaccount_ballot mb-4">
-                        <div class="socialaccount_providers">
-                            {% include "socialaccount/snippets/provider_list.html" with process="signup" %}
+<div class="min-vh-100 d-flex align-items-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8 col-sm-10">
+                <div class="card shadow-lg border-0" style="border-radius: 20px; backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.95);">
+                    <div class="card-body p-5">
+                        <!-- Logo and Header -->
+                        <div class="text-center mb-4">
+                            <div class="mb-3">
+                                <img src="{% static 'images/logo.png' %}" alt="Sumi Jewelry" height="60" class="mb-3">
+                            </div>
+                            <h2 class="fw-bold text-dark mb-2">Join Sumi Jewelry</h2>
+                            <p class="text-muted">Create your account to start shopping beautiful jewelry</p>
                         </div>
-                        <div class="login-or text-center my-3">
-                            <span class="text-muted">{% trans 'or' %}</span>
+
+                        <!-- Social Signup (if available) -->
+                        {% get_providers as socialaccount_providers %}
+                        {% if socialaccount_providers %}
+                        <div class="socialaccount_ballot mb-4">
+                            <div class="socialaccount_providers">
+                                {% include "socialaccount/snippets/provider_list.html" with process="signup" %}
+                            </div>
+                            <div class="login-or text-center my-4">
+                                <div class="position-relative">
+                                    <hr class="my-0">
+                                    <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">or sign up with email</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Signup Form -->
+                        <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+                            {% csrf_token %}
+                            
+                            <!-- Username Field -->
+                            <div class="form-floating mb-3">
+                                <input type="text" name="username" class="form-control" id="id_username" placeholder="Username" required>
+                                <label for="id_username">Username</label>
+                                {% if form.username.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.username.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Email Field -->
+                            <div class="form-floating mb-3">
+                                <input type="email" name="email" class="form-control" id="id_email" placeholder="Email" required>
+                                <label for="id_email">Email Address</label>
+                                {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.email.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Password Field -->
+                            <div class="form-floating mb-3">
+                                <input type="password" name="password1" class="form-control" id="id_password1" placeholder="Password" required>
+                                <label for="id_password1">Password</label>
+                                {% if form.password1.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.password1.errors.0 }}
+                                </div>
+                                {% endif %}
+                                <div class="form-text small">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Password must be at least 8 characters long
+                                </div>
+                            </div>
+                            
+                            <!-- Confirm Password Field -->
+                            <div class="form-floating mb-4">
+                                <input type="password" name="password2" class="form-control" id="id_password2" placeholder="Confirm Password" required>
+                                <label for="id_password2">Confirm Password</label>
+                                {% if form.password2.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.password2.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Terms and Conditions -->
+                            <div class="form-check mb-4">
+                                <input class="form-check-input" type="checkbox" id="terms" required>
+                                <label class="form-check-label text-muted small" for="terms">
+                                    I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>
+                                </label>
+                            </div>
+                            
+                            {% if redirect_field_value %}
+                            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                            {% endif %}
+                            
+                            <!-- Submit Button -->
+                            <div class="d-grid mb-3">
+                                <button class="btn btn-primary btn-lg" type="submit" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 12px; padding: 12px;">
+                                    <i class="fas fa-user-plus me-2"></i>Create Account
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Divider -->
+                        <div class="position-relative mb-4">
+                            <hr class="my-0">
+                            <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">Already have an account?</span>
+                        </div>
+
+                        <!-- Sign In Link -->
+                        <div class="text-center">
+                            <p class="mb-0 text-muted">Already have an account? 
+                                <a href="{{ login_url }}" class="text-decoration-none fw-bold" style="color: #667eea;">Sign in here</a>
+                            </p>
                         </div>
                     </div>
-
-                    {% include "socialaccount/snippets/login_extra.html" %}
-                    {% endif %}
-
-                    <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
-                        {% csrf_token %}
-                        {{ form|crispy }}
-                        {% if redirect_field_value %}
-                        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-                        {% endif %}
-                        <div class="d-grid gap-2 mt-4">
-                            <button class="btn btn-primary" type="submit">{% trans "Sign Up" %}</button>
+                </div>
+                
+                <!-- Benefits -->
+                <div class="row mt-4 text-center">
+                    <div class="col-md-4">
+                        <div class="text-white">
+                            <i class="fas fa-shipping-fast fa-2x mb-2"></i>
+                            <p class="small mb-0">Free Shipping</p>
                         </div>
-                    </form>
-
-                    <hr class="my-4">
-
-                    <div class="text-center">
-                        <p class="mb-0">{% trans "Already have an account?" %} 
-                            <a href="{{ login_url }}" class="text-decoration-none">{% trans "Sign In" %}</a>
-                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-white">
+                            <i class="fas fa-shield-alt fa-2x mb-2"></i>
+                            <p class="small mb-0">Secure Payment</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-white">
+                            <i class="fas fa-undo fa-2x mb-2"></i>
+                            <p class="small mb-0">Easy Returns</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: #667eea;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.card {
+    animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.invalid-feedback {
+    font-size: 0.875rem;
+    color: #dc3545;
+    margin-top: 0.25rem;
+}
+
+.form-text {
+    color: #6c757d;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .min-vh-100 {
+        min-height: 100vh !important;
+        padding: 1rem 0;
+    }
+    
+    .col-lg-6.col-md-8.col-sm-10 {
+        padding: 0 0.5rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1rem !important;
+        font-size: 1rem;
+    }
+    
+    .form-floating {
+        margin-bottom: 1rem !important;
+    }
+    
+    .form-floating > .form-control {
+        height: 3.5rem;
+        font-size: 1rem;
+    }
+    
+    .form-floating > label {
+        padding: 1rem 0.75rem;
+        font-size: 1rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem !important;
+    }
+    
+    .card {
+        margin: 0 0.5rem;
+        border-radius: 15px !important;
+    }
+    
+    .row.mt-4 {
+        margin-top: 1.5rem !important;
+    }
+    
+    .col-md-4 {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .btn-lg {
+        padding: 0.875rem 1rem !important;
+    }
+    
+    .form-floating > .form-control {
+        height: 3.25rem;
+    }
+    
+    .form-floating > label {
+        padding: 0.875rem 0.75rem;
+    }
+    
+    h2 {
+        font-size: 1.25rem !important;
+    }
+    
+    .row.mt-4 {
+        margin-top: 1rem !important;
+    }
+    
+    .fa-2x {
+        font-size: 1.5em !important;
+    }
+}
+</style>
 {% endblock %} 
