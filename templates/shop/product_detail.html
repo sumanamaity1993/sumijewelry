@@ -101,6 +101,24 @@
         align-items: center;
         margin-bottom: 1rem;
     }
+    
+    /* Product detail star rating styles */
+    .text-warning i {
+        font-size: 1.1rem;
+        margin-right: 0.1rem;
+    }
+    
+    .text-warning .fas.fa-star {
+        color: #ffc107;
+    }
+    
+    .text-warning .fas.fa-star-half-alt {
+        color: #ffc107;
+    }
+    
+    .text-warning .far.fa-star {
+        color: #dee2e6;
+    }
 </style>
 {% endblock %}
 
@@ -144,13 +162,7 @@
                 <div class="d-flex align-items-center">
                     <div class="text-warning me-2">
                         {% for i in "12345"|make_list %}
-                            {% if forloop.counter <= avg_rating|floatformat:0 %}
-                                <i class="fas fa-star"></i>
-                            {% elif forloop.counter|subtract:avg_rating <= 0.5 %}
-                                <i class="fas fa-star-half-alt"></i>
-                            {% else %}
-                                <i class="far fa-star"></i>
-                            {% endif %}
+                            <i class="{{ avg_rating|get_star_class:forloop.counter }}"></i>
                         {% endfor %}
                     </div>
                     <span class="ms-2">
@@ -185,7 +197,11 @@
                 {% if product.dimensions %}
                     <p class="mb-2"><strong>Dimensions:</strong> {{ product.dimensions }}</p>
                 {% endif %}
-                <p class="mb-2"><strong>Stock:</strong> {{ product.stock }} available</p>
+                {% if product.stock > 0 %}
+                    <p class="mb-2"><strong>Status:</strong> <span class="text-success">Available</span></p>
+                {% else %}
+                    <p class="mb-2"><strong>Status:</strong> <span class="text-danger">Out of Stock</span></p>
+                {% endif %}
             </div>
 
             <div class="mb-4">
@@ -214,6 +230,10 @@
                             <i class="fas fa-shopping-cart me-2"></i>Add to Cart
                         </button>
                     </div>
+                    <small class="text-muted mt-2">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Maximum {{ product.stock }} item{{ product.stock|pluralize }} can be added to cart
+                    </small>
                 </form>
                 {% else %}
                 <div class="d-grid">

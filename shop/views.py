@@ -221,7 +221,14 @@ def product_detail(request, slug):
 def cart_detail(request):
     """View for displaying the shopping cart."""
     cart, created = Cart.objects.get_or_create(user=request.user)
-    return render(request, 'shop/cart_detail.html', {'cart': cart})
+    
+    # Check for stock issues
+    has_stock_issues = any(item.quantity > item.product.stock for item in cart.items.all())
+    
+    return render(request, 'shop/cart_detail.html', {
+        'cart': cart,
+        'has_stock_issues': has_stock_issues
+    })
 
 @login_required
 def cart_add(request, product_id):
@@ -239,6 +246,10 @@ def cart_add(request, product_id):
     )
     
     if not created:
+        # Check if adding one more would exceed stock
+        if cart_item.quantity >= product.stock:
+            messages.error(request, f'Sorry, only {product.stock} item(s) of {product.name} available in stock.')
+            return redirect('shop:product_detail', slug=product.slug)
         cart_item.quantity += 1
         cart_item.save()
     
@@ -307,6 +318,11 @@ def cart_update(request, product_id):
     
     # Check if this is the last item in cart
     is_last_item = cart.items.count() == 1
+    
+    # Validate quantity against available stock
+    if quantity > product.stock:
+        messages.error(request, f'Sorry, only {product.stock} item(s) of {product.name} available in stock.')
+        return redirect('shop:cart_detail')
     
     if quantity > 0:
         cart_item.quantity = quantity

@@ -72,4 +72,23 @@ def filter_reviews(reviews, context=None):
         return reviews.filter(is_approved=True) | reviews.filter(user=request.user)
     
     # Otherwise, only show approved reviews
-    return reviews.filter(is_approved=True) 
+    return reviews.filter(is_approved=True)
+
+@register.filter
+def get_star_class(rating, position):
+    """
+    Get the appropriate star class for a given rating and position.
+    Usage: {{ rating|get_star_class:forloop.counter }}
+    """
+    try:
+        rating = float(rating)
+        position = int(position)
+        
+        if position <= int(rating):
+            return 'fas fa-star'  # Full star
+        elif position == int(rating) + 1 and rating != int(rating):
+            return 'fas fa-star-half-alt'  # Half star
+        else:
+            return 'far fa-star'  # Empty star
+    except (ValueError, TypeError):
+        return 'far fa-star'  # Empty star for invalid values 

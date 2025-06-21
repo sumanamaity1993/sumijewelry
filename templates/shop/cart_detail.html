@@ -53,29 +53,35 @@
                                 </a>
                             </div>
                             
-                            <!-- Product Details -->
-                            <div class="col-md-6 col-sm-5">
-                                <div class="ps-md-3">
-                                    <a href="{{ item.product.get_absolute_url }}" class="text-decoration-none">
-                                        <h5 class="card-title text-dark mb-2 fw-bold">{{ item.product.name }}</h5>
-                                    </a>
-                                    <p class="text-muted small mb-2">
-                                        <i class="fas fa-gem me-1"></i>
-                                        Material: {{ item.product.material }}
-                                    </p>
+                            <!-- Product Info -->
+                            <div class="col-md-6 col-sm-6">
+                                <div class="d-flex flex-column h-100">
+                                    <h6 class="fw-bold mb-2">
+                                        <a href="{% url 'shop:product_detail' item.product.slug %}" class="text-decoration-none text-dark">
+                                            {{ item.product.name }}
+                                        </a>
+                                    </h6>
+                                    <p class="text-muted small mb-2">{{ item.product.material }}</p>
+                                    
+                                    <!-- Stock Warning -->
+                                    {% if item.quantity > item.product.stock %}
+                                    <div class="alert alert-warning py-2 px-3 mb-2" style="border-radius: 8px; font-size: 0.8rem;">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        <strong>Stock Update:</strong> Only {{ item.product.stock }} item{{ item.product.stock|pluralize }} available. 
+                                        Please update your quantity.
+                                    </div>
+                                    {% endif %}
                                     
                                     <!-- Price Display -->
-                                    <div class="mb-3">
-                                        {% if item.price < item.product.price %}
-                                            <div class="d-flex align-items-center">
-                                                <span class="text-decoration-line-through text-muted me-2">₹{{ item.product.price|indian_currency }}</span>
-                                                <span class="text-success fw-bold fs-5">₹{{ item.price|indian_currency }}</span>
-                                                <span class="badge bg-success ms-2">
-                                                    -{{ item.product.discount_percentage }}%
-                                                </span>
+                                    <div class="mt-auto">
+                                        {% if item.product.is_discount_active %}
+                                            <div class="d-flex align-items-center flex-wrap">
+                                                <span class="fw-bold text-success me-2">{{ item.product.get_discounted_price|indian_currency }}</span>
+                                                <span class="text-muted text-decoration-line-through me-2">{{ item.product.price|indian_currency }}</span>
+                                                <span class="badge bg-success">-{{ item.product.discount_percentage }}%</span>
                                             </div>
                                         {% else %}
-                                            <span class="text-dark fw-bold fs-5">₹{{ item.price|indian_currency }}</span>
+                                            <span class="fw-bold text-primary">{{ item.product.price|indian_currency }}</span>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -94,7 +100,7 @@
                                                     <i class="fas fa-minus"></i>
                                                 </button>
                                                 <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" 
-                                                       class="form-control form-control-sm text-center border-secondary" 
+                                                       class="form-control form-control-sm text-center border-secondary {% if item.quantity >= item.product.stock %}border-warning{% endif %}" 
                                                        onchange="this.form.submit()"
                                                        style="border-left: 0; border-right: 0;">
                                                 <button type="button" class="btn btn-outline-secondary btn-sm" onclick="incrementQuantity(this)">
@@ -102,6 +108,12 @@
                                                 </button>
                                             </div>
                                         </form>
+                                        {% if item.quantity >= item.product.stock %}
+                                        <small class="text-warning d-block mt-1">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            Maximum stock reached
+                                        </small>
+                                        {% endif %}
                                     </div>
                                     
                                     <!-- Total Price -->
@@ -176,10 +188,17 @@
                     
                     <!-- Checkout Button -->
                     <div class="d-grid mb-3">
-                        <a href="{% url 'shop:checkout' %}" class="btn btn-primary btn-lg" style="border-radius: 12px; padding: 12px;">
-                            <i class="fas fa-credit-card me-2"></i>
-                            Proceed to Checkout
-                        </a>
+                        {% if has_stock_issues %}
+                            <button class="btn btn-secondary btn-lg" disabled style="border-radius: 12px; padding: 12px;">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Fix Stock Issues First
+                            </button>
+                        {% else %}
+                            <a href="{% url 'shop:checkout' %}" class="btn btn-primary btn-lg" style="border-radius: 12px; padding: 12px;">
+                                <i class="fas fa-credit-card me-2"></i>
+                                Proceed to Checkout
+                            </a>
+                        {% endif %}
                     </div>
                     
                     <!-- Continue Shopping -->
