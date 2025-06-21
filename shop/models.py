@@ -214,9 +214,10 @@ class Order(models.Model):
     ]
 
     PAYMENT_METHOD_CHOICES = [
+        ('upi', 'UPI'),
+        ('cod', 'Cash on Delivery'),
         ('credit_card', 'Credit Card'),
         ('debit_card', 'Debit Card'),
-        ('upi', 'UPI'),
         ('net_banking', 'Net Banking'),
     ]
 
@@ -231,7 +232,7 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_status = models.BooleanField(default=False)
-    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='credit_card')
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='upi')
     tracking_number = models.CharField(max_length=50, blank=True)
     notes = models.TextField(blank=True)
 

@@ -124,8 +124,7 @@
                                     <!-- Remove Button -->
                                     <a href="{% url 'shop:cart_remove' item.product.id %}" 
                                        class="btn btn-outline-danger btn-sm remove-item-btn"
-                                       data-product-name="{{ item.product.name }}"
-                                       onclick="return confirmRemoveItem(this, '{{ item.product.name }}')">
+                                       data-product-name="{{ item.product.name }}">
                                         <i class="fas fa-trash me-1"></i>
                                         Remove
                                     </a>
@@ -489,11 +488,9 @@ function decrementQuantity(button) {
         input.value = currentValue - 1;
         input.form.submit();
     } else {
-        // Show confirmation for removing the last item
-        if (confirm('This will remove the item from your cart. Continue?')) {
-            input.value = 0;
-            input.form.submit();
-        }
+        // Remove the last item directly without confirmation
+        input.value = 0;
+        input.form.submit();
     }
 }
 
@@ -599,13 +596,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const removeButtons = document.querySelectorAll('.remove-item-btn');
     removeButtons.forEach(button => {
         button.addEventListener('click', function(e) {
-            const productName = this.getAttribute('data-product-name') || 'this item';
-            if (!confirm(`Are you sure you want to remove ${productName} from your cart?`)) {
-                e.preventDefault();
-                return false;
-            }
-            
-            // Show loading state
+            // Show loading state immediately
             this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Removing...';
             this.disabled = true;
             
@@ -614,21 +605,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-
-// Function to confirm item removal
-function confirmRemoveItem(button, productName) {
-    if (confirm(`Are you sure you want to remove ${productName} from your cart?`)) {
-        // Show loading state
-        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Removing...';
-        button.disabled = true;
-        
-        // Update cart count immediately for better UX
-        updateCartCountOnRemove();
-        
-        return true;
-    }
-    return false;
-}
 
 // Function to handle cart count when items are removed
 function updateCartCountOnRemove() {

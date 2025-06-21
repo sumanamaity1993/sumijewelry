@@ -376,8 +376,8 @@ def checkout(request):
                 address=request.POST.get('address'),
                 phone=request.POST.get('phone'),
                 total_amount=total_amount,
-                payment_method=request.POST.get('payment_method', 'credit_card'),
-                payment_status=request.POST.get('payment_method') == 'credit_card'
+                payment_method=request.POST.get('payment_method', 'upi'),
+                payment_status=request.POST.get('payment_method') == 'upi'
             )
             
             # Create order items and update inventory

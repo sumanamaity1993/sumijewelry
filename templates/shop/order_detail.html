@@ -179,8 +179,21 @@
                         </span>
                     </p>
                     <p class="mb-0">
-                        <strong>Payment Method:</strong> {{ order.get_payment_method_display }}
+                        <strong>Payment Method:</strong> 
+                        {% if order.payment_method == 'upi' %}
+                            <i class="fas fa-mobile-alt me-1"></i>UPI Payment
+                        {% elif order.payment_method == 'cod' %}
+                            <i class="fas fa-money-bill-wave me-1"></i>Cash on Delivery
+                        {% else %}
+                            {{ order.get_payment_method_display }}
+                        {% endif %}
                     </p>
+                    {% if order.payment_method == 'cod' and not order.payment_status %}
+                        <small class="text-muted mt-2 d-block">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Payment will be collected upon delivery
+                        </small>
+                    {% endif %}
                 </div>
             </div>
         </div>
